@@ -1,0 +1,4 @@
+# You may have to get a newer version of bvh from https://github.com/20tab/bvh-python.
+bvh > 0.3
+numpy >= 1.15
+transforms3d >= 0.3.1
