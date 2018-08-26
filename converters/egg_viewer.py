@@ -41,11 +41,11 @@ class MyApp(ShowBase):
         self.setup_events()
         
     def load_actor(self):
-        self.avatar = Actor('example_files/egg/blend_export_skeleton_mesh.egg',
-                            {'ground_truth': 'example_files/egg/blend_export_anim-Walk01.egg',
-                             'converted': 'example_files/egg/walk01_raw.egg',
+        self.avatar = Actor('example_files/egg/skeleton_and_mesh.egg',
+                            {'ground_truth': 'example_files/egg/walk01_blender_export.egg',
+                             'converted': 'example_files/egg/walk01_converted.egg',
                              })
-        self.avatar.setScale(2.0, 2.0, 2.0)
+        self.avatar.setScale(0.02, 0.02, 0.02)
         self.avatar.reparentTo(self.render)
         # Loop its animation.
         self.avatar.loop("converted")
