@@ -13,7 +13,9 @@ Following destination formats are supported by the converters:
 # How to run the converter batch scripts (and circumvent ModuleNotFoundError)
 * Open terminal.
 * Go to parent directory of the __converters__ folder. Enter, for example:
-* `python -m converters.bvh2egg_batch` "*path/to/folder*" [-o "*output/folder*"]
-* or `python -m converters.bvh2xaf` "*path/to/file.bvh*" [-o "*destination/path/file.xaf*"]
+* `python -m converters.bvh2egg_batch` "*path/to/folder*" [-o "*output/folder*"] [-s 0.01]
+* or `python -m converters.bvh2xaf` "*path/to/file.bvh*" [-o "*destination/path/file.xaf*"] [-s 100]
   * Use UNIX style file path separators ( __/__ ) if there are spaces in your path.
-  * The `--out` statement in square brackets is optional. If you don't provide it, files are saved in the source folder.
+  * The statements in square brackets are optional. 
+    * `--out` or `-o` Specify the destination of the output. If you don't provide it, files are saved in the source folder.
+    * `--scale` or `-s` is a scale factor on the root's translation and joints' offset values in case you need to convert the data to meters or centimenter. This may depend on how you exported the skeleton.
