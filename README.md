@@ -18,4 +18,4 @@ Following destination formats are supported by the converters:
   * Use UNIX style file path separators ( __/__ ) if there are spaces in your path.
   * The statements in square brackets are optional. 
     * `--out` or `-o` Specify the destination of the output. If you don't provide it, files are saved in the source folder.
-    * `--scale` or `-s` is a scale factor on the root's translation and joints' offset values in case you need to convert the data to meters or centimenter. This may depend on how you exported the skeleton.
+    * `--scale` or `-s` is a scale factor on the root's translation and joints' offset values in case you need to convert the data to meters or centimeters. This may depend on how you exported the skeleton.
