@@ -85,7 +85,18 @@ from converters.bvh_transforms import get_all_joint_names, get_quaternions, get_
 from converters.ElementTree_pretty import prettify
 
 
-def get_track(bvh_tree, joint_name):
+def get_track(bvh_tree, joint_name, scale=1.0):
+    """Build the XML structure for a joints animation data.
+    
+    :param bvh_tree: BVH tree that holds the data.
+    :type bvh_tree: bvh.Bvh
+    :param joint_name: Name of joint to extract data from.
+    :type joint_name: str
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
+    :return: XML structure with animation data for this joint.
+    :rtype: xml.etree.ElementTree.Element
+    """
     n_frames = bvh_tree.nframes
     # Find correct BoneID (when End Sites are included).
     track = XmlTree.Element("TRACK", {'BONEID': str(bvh_tree.joint_indices[joint_name]),
@@ -107,7 +118,7 @@ def get_track(bvh_tree, joint_name):
         # For whatever reason switch w and x.
         quats[:, 0], quats[:, 1] = quats[:, 1], quats[:, 0].copy()
         # Root translation.
-        translations = get_translations(bvh_tree, joint_name)
+        translations = get_translations(bvh_tree, joint_name) * scale
         # Invert Z direction.
         translations[:, 2] *= -1
         # Because of the rotation, we need to switch Y and Z translation.
@@ -120,7 +131,7 @@ def get_track(bvh_tree, joint_name):
     quats = np.roll(quats, shift=-1, axis=1)
     
     offsets = bvh_tree.joint_offset(joint_name)
-    offsets_str = '{} {} {}'.format(offsets[0]*0.01, offsets[1]*0.01, offsets[2]*0.01)  # Convert to meters.
+    offsets_str = '{} {} {}'.format(offsets[0]*scale, offsets[1]*scale, offsets[2]*scale)
     # For non-root joints use offset.
     t_str = offsets_str
     
@@ -149,13 +160,15 @@ def get_track(bvh_tree, joint_name):
     return track
 
 
-def bvh2xaf(bvh_filepath, dst_filepath=None):
+def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
     """ Converts a BVH file into the Cal3D XAF animation file format.
 
     :param bvh_filepath: File path for BVH source.
     :type bvh_filepath: str
     :param dst_filepath: File path for destination Cal3D animation file (XAF).
     :type dst_filepath: str
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
     """
     with open(bvh_filepath) as file_handle:
         mocap = Bvh(file_handle.read())
@@ -176,7 +189,7 @@ def bvh2xaf(bvh_filepath, dst_filepath=None):
     comment = XmlTree.Comment('Converted from {}'.format(os.path.basename(bvh_filepath)))
     xml_root.append(comment)
     # Use map to compute tracks.
-    tracks = list(map(get_track, itertools.repeat(mocap), joint_names))
+    tracks = list(map(get_track, itertools.repeat(mocap), joint_names, itertools.repeat(scale)))
     # Extend tracks to xml_root as children.
     xml_root.extend(tracks)
     # Add indentation.
@@ -200,12 +213,16 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("-o", "--out", type=str, help="Destination file path for XAF file. "
                                                       "If no out path is given, BVH file path is used.")
+    parser.add_argument("-s", "--scale", type=float, default=1.0,
+                        help="Scale factor for root translation and offset values. In case you have to switch from "
+                             "centimeters to meters or vice versa.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to XAF.")
     args = vars(parser.parse_args())
     src_file_path = args['input.bvh']
     dst_file_path = args['out']
+    scale = args['scale']
     
     if not os.path.exists(src_file_path):
         print("ERROR: file not found", src_file_path)
         sys.exit(1)
-    bvh2xaf(src_file_path, dst_file_path)
+    bvh2xaf(src_file_path, dst_file_path, scale)

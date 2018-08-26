@@ -172,12 +172,14 @@ import numpy as np
 from converters.bvh_transforms import get_all_joints, get_euler_angles, get_quaternions, get_translations, get_affines, prune
 
 
-def get_joint_data(bvh_tree, joint):
+def get_joint_data(bvh_tree, joint, scale=1.0):
     """ Extract data for a joint in the BVH tree that is relevant for compiling the egg file content.
     :param bvh_tree: BVH tree that holds the data.
     :type bvh_tree: bvh.Bvh
     :param joint: Joint object to extract data from for egg file.
     :type joint: bvh.BvhNode
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
     :return: egg animation table compatible data
     :rtype: dict
     """
@@ -197,7 +199,7 @@ def get_joint_data(bvh_tree, joint):
     # Is this a leaf node?
     if joint.value[0] == 'End':
         data['leaf'] = True
-        offsets = [float(o)*0.01 for o in joint['OFFSET']]  # Convert to meters.
+        offsets = [float(o)*scale for o in joint['OFFSET']]  # Convert to meters or centimeters.
         data['x'] = [offsets[0]]
         data['y'] = [offsets[1]]
         data['z'] = [offsets[2]]
@@ -249,7 +251,7 @@ def get_joint_data(bvh_tree, joint):
                      'h': eulers[:, axes.index('z')],
                      }
         
-        translations = loc_rot[:, :3]
+        translations = loc_rot[:, :3] * scale
         data['x'] = translations[:, 0]
         data['y'] = translations[:, 1]
         data['z'] = translations[:, 2]
@@ -261,7 +263,7 @@ def get_joint_data(bvh_tree, joint):
                      'h': euler_xyz[:, 2],
                      }
         # Write offsets instead of translation for joints.
-        offsets = np.array(bvh_tree.joint_offset(joint.name)) * 0.01  # Convert to meters.
+        offsets = np.array(bvh_tree.joint_offset(joint.name)) * scale
         data['x'] = [offsets[0]]
         data['y'] = [offsets[1]]
         data['z'] = [offsets[2]]
@@ -323,30 +325,34 @@ def close_tables(egg_string, target_level=0):
     return egg_string
 
 
-def get_egg_anim_tables(bvh_tree):
+def get_egg_anim_tables(bvh_tree, scale=1.0):
     """Get the XML animation tables for the BVH structure as a string.
     
     :param bvh_tree:
     :type bvh_tree: bvh.BVH
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
     :return: string containing the animation tables.
     :rtype: str
     """
     egg_string = ''
     for joint in get_all_joints(bvh_tree):
-        joint_data = get_joint_data(bvh_tree, joint)
+        joint_data = get_joint_data(bvh_tree, joint, scale=scale)
         # Close open tables, before we start a new one with a lesser level.
         egg_string = close_tables(egg_string, joint_data['level'] + 3)
         egg_string += data2egg(joint_data)
     return egg_string
 
 
-def bvh2egg(bvh_filepath, dst_filepath=None):
+def bvh2egg(bvh_filepath, dst_filepath=None, scale=1.0):
     """ Converts a BVH file into the Panda3D egg animation file format.
     
     :param bvh_filepath: File path for BVH source.
     :type bvh_filepath: str
     :param dst_filepath: File path for destination Panda3D Egg file.
     :type dst_filepath: str
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
     """
     with open(bvh_filepath) as file_handle:
         mocap = Bvh(file_handle.read())
@@ -356,7 +362,7 @@ def bvh2egg(bvh_filepath, dst_filepath=None):
     comment = '<Comment> {{ Converted from {0} }}\n'.format(os.path.basename(bvh_filepath))
     init_table_str = '<Table> {\n  <Bundle> Armature {\n    <Table> "<skeleton>" {\n'
     
-    egg_str = coords_up + comment + init_table_str + get_egg_anim_tables(mocap)
+    egg_str = coords_up + comment + init_table_str + get_egg_anim_tables(mocap, scale=scale)
     egg_str = close_tables(egg_str)
     
     if not dst_filepath:
@@ -377,12 +383,16 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.2')
     parser.add_argument("-o", "--out", type=str, help="Destination file path for egg file. "
                                                       "If no out path is given, BVH file path is used.")
+    parser.add_argument("-s", "--scale", type=float, default=1.0,
+                        help="Scale factor for root translation and offset values. In case you have to switch from "
+                             "centimeters to meters or vice versa.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to egg.")
     args = vars(parser.parse_args())
     src_file_path = args['input.bvh']
     dst_file_path = args['out']
+    scale = args['scale']
     
     if not os.path.exists(src_file_path):
         print("ERROR: file not found", src_file_path)
         sys.exit(1)
-    bvh2egg(src_file_path, dst_file_path)
+    bvh2egg(src_file_path, dst_file_path, scale)

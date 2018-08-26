@@ -64,7 +64,18 @@ from converters.bvh_transforms import get_all_joints
 from converters.ElementTree_pretty import prettify
 
 
-def get_bone_xml(joint, bvh_tree):
+def get_bone_xml(bvh_tree, joint, scale=1.0):
+    """Build the XML structure for a joints topological data.
+    
+    :param bvh_tree: BVH tree that holds the data.
+    :type bvh_tree: bvh.Bvh
+    :param joint: Joint object to extract data from for egg file.
+    :type joint: bvh.BvhNode
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
+    :return: XML structure with topological data for this joint.
+    :rtype: xml.etree.ElementTree.Element
+    """
     # Get direct child joints.
     children = list()
     for child in joint.filter('JOINT'):
@@ -77,7 +88,7 @@ def get_bone_xml(joint, bvh_tree):
                                         'NUMCHILDS': str(len(children)),
                                         })
     
-    offsets = [float(o) * 0.01 for o in joint['OFFSET']]  # Convert to meters.
+    offsets = [float(o) * scale for o in joint['OFFSET']]  # Convert to meters.
     world_trans = t3d.affines.compose(offsets, np.identity(3), np.ones(3))
     
     if joint.parent.value:
@@ -96,7 +107,7 @@ def get_bone_xml(joint, bvh_tree):
     idx = parent_id
     while idx >= 0:
         parent = bvh_tree.joints[idx]
-        parent_offsets = [float(o) * 0.01 for o in parent['OFFSET']]
+        parent_offsets = [float(o) * scale for o in parent['OFFSET']]
         parent_trans = t3d.affines.compose(parent_offsets, np.identity(3), np.ones(3))
         world_trans = np.matmul(world_trans, parent_trans)
         if parent.parent.value:
@@ -117,13 +128,15 @@ def get_bone_xml(joint, bvh_tree):
     return bone_xml
     
     
-def bvh2xsf(bvh_filepath, dst_filepath=None):
-    """ Converts a BVH file into the Cal3D XSF skeleton file format.
+def bvh2xsf(bvh_filepath, dst_filepath=None, scale=1.0):
+    """Converts a BVH file into the Cal3D XSF skeleton file format.
 
     :param bvh_filepath: File path for BVH source.
     :type bvh_filepath: str
     :param dst_filepath: File path for destination Cal3D skeleton file (XSF).
     :type dst_filepath: str
+    :param scale: Scale factor for root translation and offset values.
+    :type scale: float
     """
     with open(bvh_filepath) as file_handle:
         mocap = Bvh(file_handle.read())
@@ -137,7 +150,7 @@ def bvh2xsf(bvh_filepath, dst_filepath=None):
     comment = XmlTree.Comment('Converted from {}'.format(os.path.basename(bvh_filepath)))
     xml_root.append(comment)
     # Use map to compute tracks.
-    bones = list(map(get_bone_xml, mocap.joints, itertools.repeat(mocap)))
+    bones = list(map(get_bone_xml, itertools.repeat(mocap), mocap.joints, itertools.repeat(scale)))
     # Extend tracks to xml_root as children.
     xml_root.extend(bones)
     # Add indentation.
@@ -161,12 +174,16 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("-o", "--out", type=str, help="Destination file path for XSF file. "
                                                       "If no out path is given, BVH file path is used.")
+    parser.add_argument("-s", "--scale", type=float, default=1.0,
+                        help="Scale factor for root translation and offset values. In case you have to switch from "
+                             "centimeters to meters or vice versa.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to XSF.")
     args = vars(parser.parse_args())
     src_file_path = args['input.bvh']
     dst_file_path = args['out']
+    scale = args['scale']
     
     if not os.path.exists(src_file_path):
         print("ERROR: file not found", src_file_path)
         sys.exit(1)
-    bvh2xsf(src_file_path, dst_file_path)
+    bvh2xsf(src_file_path, dst_file_path, scale)

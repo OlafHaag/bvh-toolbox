@@ -174,7 +174,6 @@ def get_translations(bvh_tree, joint_name):
     """
     translations = np.array(bvh_tree.frames_joint_channels(joint_name, ['Xposition', 'Yposition', 'Zposition'],
                                                            value=0.0))  # For missing channels. bvh > v3.0!
-    translations *= 0.01  # Convert to meters.
     return translations
     
     

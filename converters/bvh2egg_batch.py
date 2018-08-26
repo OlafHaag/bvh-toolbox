@@ -16,10 +16,14 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("-o", "--out", type=str, help="Destination folder path for egg files. "
                                                       "If no out path is given, BVH folder is used.")
+    parser.add_argument("-s", "--scale", type=float, default=1.0,
+                        help="Scale factor for root translation and offset values. In case you have to switch from "
+                             "centimeters to meters or vice versa.")
     parser.add_argument("input folder", type=str, help="Folder containing BVH source files.")
     args = vars(parser.parse_args())
     src_folder_path = args['input folder']
     dst_folder_path = args['out']
+    scale = args['scale']
     if not dst_folder_path:
         dst_folder_path = ''
         
@@ -33,7 +37,7 @@ if __name__ == "__main__":
     # Collect all BVH files in folder and pair with out file as arguments for converter.
     file_args = list()
     for filename in glob.glob("*.bvh"):
-        file_args.append((filename, os.path.join(dst_folder_path, filename[:-3] + 'egg')))
+        file_args.append((filename, os.path.join(dst_folder_path, filename[:-3] + 'egg'), scale))
     
     print("Converting {} files...".format(len(file_args)))
     PROCESSES = min(len(file_args), 8)
