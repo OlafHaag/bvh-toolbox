@@ -43,5 +43,8 @@ if __name__ == "__main__":
     PROCESSES = min(len(file_args), 8)
     print("\nCreating pool with {} processes".format(PROCESSES))
     with Pool(processes=PROCESSES) as p:
-        p.starmap(bvh2egg, file_args)
+        res = p.starmap(bvh2egg, file_args)
     print("Processing took: {:.2f} seconds".format(time.time()-t0))
+    # Were there errors?
+    if sum(res) != len(res):
+        print("ERROR: Not all conversions were successful.")

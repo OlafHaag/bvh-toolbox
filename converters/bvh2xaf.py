@@ -169,6 +169,8 @@ def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
     :type dst_filepath: str
     :param scale: Scale factor for root translation and offset values.
     :type scale: float
+    :return: If the conversion was successful or not.
+    :rtype: bool
     """
     with open(bvh_filepath) as file_handle:
         mocap = Bvh(file_handle.read())
@@ -200,9 +202,11 @@ def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
     try:
         with open(dst_filepath, 'w') as file_handle:
             file_handle.write(xml_str)
+        return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
               "Make sure you have writing permissions.\n".format(e.errno, dst_filepath))
+        return False
         
 
 if __name__ == "__main__":
@@ -225,4 +229,6 @@ if __name__ == "__main__":
     if not os.path.exists(src_file_path):
         print("ERROR: file not found", src_file_path)
         sys.exit(1)
-    bvh2xaf(src_file_path, dst_file_path, scale)
+    success = bvh2xaf(src_file_path, dst_file_path, scale)
+    if not success:
+        sys.exit(1)
