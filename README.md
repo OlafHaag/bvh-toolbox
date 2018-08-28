@@ -10,6 +10,16 @@ Following destination formats are supported by the converters:
 # BVH to Panda3D Egg animation file
 * Converts BVH files to the [Panda3D](https://panda3d.org/) animation file egg format.
 
+# BVH to CSV tables
+* Converts BVH to comma separated values tables.
+* Ouputs one file for joint rotation and one for joint world location.
+* Using only the `--rotation` or the `--location` flag you can output only one of the tables.
+* The `--out` parameter only takes a directory path as an argument.
+* With the `--ends` flag the End Sites are included in the *_loc.csv file.
+
+
+All converters have a `--scale` parameter taking a float as an argument. You can use it to convert between units for the location and offset values. 
+
 # How to run the converter batch scripts (and circumvent ModuleNotFoundError)
 * Open terminal.
 * Go to parent directory of the __converters__ folder. Enter, for example:
