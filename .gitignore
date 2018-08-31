@@ -102,7 +102,6 @@ var/
 wheels/
 *.egg-info/
 .installed.cfg
-*.egg
 MANIFEST
 
 # PyInstaller
