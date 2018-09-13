@@ -2,9 +2,9 @@
 
 from distutils.core import setup
 
-setup(name='bvh-tools',
+setup(name='bvhtools',
       version='0.1',
-      description='Python module for manupulating and converting BVH mocap files',
+      description='Python module for manipulating and converting BVH mocap files',
       author='Olaf Haag',
       author_email='haag.olaf@gmail.com',
       url='https://github.com/olafhaag/bvh-tools',
