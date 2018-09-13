@@ -21,10 +21,10 @@
 # SOFTWARE.
 from itertools import repeat
 
-from bvh import Bvh
 import numpy as np
 import transforms3d as t3d
 
+from bvhtree import BvhTree
 
 # Axis sequences for Euler angles.
 _NEXT_AXIS = [1, 2, 0, 1]
@@ -35,39 +35,6 @@ _AXES2TUPLE = {
     'xzx': (0, 1), 'yzx': (1, 0), 'yzy': (1, 0),
     'yxz': (1, 1), 'yxy': (1, 1), 'zxy': (2, 0),
     'zxz': (2, 0), 'zyx': (2, 1), 'zyz': (2, 1)}
-
-
-def get_all_joint_names(bvh_tree):
-    """Includes End Sites with dummy names."""
-    joints = []
-    
-    def iterate_joints(joint):
-        joints.append(joint.value[1])
-        if list(joint.filter('End')):
-            joints.append(joint.value[1] + '_End')
-        for child in joint.filter('JOINT'):
-            iterate_joints(child)
-    
-    iterate_joints(next(bvh_tree.root.filter('ROOT')))
-    return joints
-    
-
-def get_all_joints(bvh_tree):
-    """Includes End Sites."""
-    joints = []
-    
-    def iterate_joints(joint):
-        joints.append(joint)
-        end = list(joint.filter('End'))
-        if end:
-            end = end[0]  # There can be only one End Site per joint.
-            end.value[1] = end.parent.name + "_End"
-            joints.append(end)
-        for child in joint.filter('JOINT'):
-            iterate_joints(child)
-    
-    iterate_joints(next(bvh_tree.root.filter('ROOT')))
-    return joints
 
 
 def prune(a, epsilon=0.00000001):
@@ -113,7 +80,7 @@ def get_euler_angles(bvh_tree, joint_name, axes='zxy'):
     """Return Euler angles in degrees for joint in all frames.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint_name: Name of the joint
     :type joint_name: str
     :param axes: The order in which to return the angles. Usually that's the joint's channel order.
@@ -130,7 +97,7 @@ def get_quaternions(bvh_tree, joint_name, axes='rzxz'):
     """Get the wxyz quaternion representations of a joint for all frames.
     
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param axes: The order in which to parse the Euler angles. Usually that's the joint's channel order.
@@ -148,7 +115,7 @@ def get_rotation_matrices(bvh_tree, joint_name, axes='rzxz'):
     """Read the Euler angles of a joint in order given by axes and return it as rotation matrices for all frames.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param axes: The order in which to return the angles. Usually that's the joint's channel order.
@@ -166,7 +133,7 @@ def get_translations(bvh_tree, joint_name):
     """Get the xyz translation of a joint for all frames.
     
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :return: translations xyz for all frames (frames x 3).
@@ -181,7 +148,7 @@ def get_affines(bvh_tree, joint_name, axes='rzxz'):
     """Read the transforms of a joint with rotation in order given by axes and return it as an affine matrix.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param axes: The order in which to return the angles. Usually that's the joint's channel order.
@@ -203,7 +170,7 @@ if __name__ == '__main__':
     # Testing
     bvh_filepath = "example_files/source/walk01.bvh"
     with open(bvh_filepath) as file_handle:
-        mocap = Bvh(file_handle.read())
+        mocap = BvhTree(file_handle.read())
     
     mat_hips = get_affines(mocap, 'pelvis')
     mat_left_hand = get_affines(mocap, 'left_radius')

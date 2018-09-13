@@ -33,18 +33,18 @@ import sys
 import argparse
 import pandas as pd
 
-from bvh import Bvh
 import numpy as np
 import transforms3d as t3d
 
-from converters.bvh_transforms import get_affines
+from bvhtree import BvhTree
+from converters.bvhtransforms import get_affines
 
 
 def write_joint_rotations(bvh_tree, filepath):
     """Write joints' rotation data to a CSV file.
 
     :param bvh_tree: BVH tree that holds the data.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param filepath: Destination file path for CSV file.
     :type filepath: str
     :return: If the write process was successful or not.
@@ -72,7 +72,7 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
     """Write joints' world positional data to a CSV file.
     
     :param bvh_tree: BVH tree that holds the data.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param filepath: Destination file path for CSV file.
     :type filepath: str
     :param scale: Scale factor for root translation and offset values.
@@ -88,11 +88,10 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
     
     def get_world_locations(joint):
         if joint.value[0] == 'End':
-            joint.value[1] = joint.parent.name + '_End'  # Otherwise its name is just 'Site'.
             joint.world_transforms = np.tile(t3d.affines.compose(np.zeros(3), np.eye(3), np.ones(3)),
                                              (bvh_tree.nframes, 1, 1))
         else:
-            channels = joint['CHANNELS'][1:]  # bvh_tree.joint_channels wouldn't work for End Sites.
+            channels = bvh_tree.joint_channels(joint.name)
             axes_order = ''.join([ch[:1] for ch in channels if ch[1:] == 'rotation']).lower()  # FixMe: This isn't going to work when not all rotation channels are present
             axes_order = 's' + axes_order[::-1]
             joint.world_transforms = get_affines(bvh_tree, joint.name, axes=axes_order)
@@ -148,7 +147,7 @@ def bvh2csv(bvh_filepath, dst_dirpath=None, scale=1.0, do_rotation=True, do_loca
     """
     try:
         with open(bvh_filepath) as file_handle:
-            mocap = Bvh(file_handle.read())
+            mocap = BvhTree(file_handle.read())
     except IOError as e:
         print("ERROR {}: Could not open file".format(e.errno), bvh_filepath)
         return False

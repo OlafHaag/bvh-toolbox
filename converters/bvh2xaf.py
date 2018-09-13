@@ -77,11 +77,11 @@ import argparse
 import xml.etree.ElementTree as XmlTree
 import itertools
 
-from bvh import Bvh
 import numpy as np
 import transforms3d as t3d
 
-from converters.bvh_transforms import get_all_joint_names, get_quaternions, get_translations
+from bvhtree import BvhTree
+from converters.bvhtransforms import get_quaternions, get_translations
 from converters.ElementTree_pretty import prettify
 
 
@@ -89,7 +89,7 @@ def get_track(bvh_tree, joint_name, scale=1.0):
     """Build the XML structure for a joints animation data.
     
     :param bvh_tree: BVH tree that holds the data.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint_name: Name of joint to extract data from.
     :type joint_name: str
     :param scale: Scale factor for root translation and offset values.
@@ -99,7 +99,7 @@ def get_track(bvh_tree, joint_name, scale=1.0):
     """
     n_frames = bvh_tree.nframes
     # Find correct BoneID (when End Sites are included).
-    track = XmlTree.Element("TRACK", {'BONEID': str(bvh_tree.joint_indices[joint_name]),
+    track = XmlTree.Element("TRACK", {'BONEID': str(bvh_tree.get_joint_index(joint_name)),
                                       'NUMKEYFRAMES': str(n_frames)
                                       })
     
@@ -173,15 +173,11 @@ def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
     :rtype: bool
     """
     with open(bvh_filepath) as file_handle:
-        mocap = Bvh(file_handle.read())
+        mocap = BvhTree(file_handle.read())
     
     duration = (mocap.nframes - 1) * mocap.frame_time
     joint_names = mocap.get_joints_names()
     n_tracks = len(joint_names)
-    # End sites are excluded in joint_names. This could mess with joint indices. Build own indices (depth first).
-    # Option 2: Parse ascii skeleton definition for mapping of joint names to indices.
-    names_with_end_sites = get_all_joint_names(mocap)
-    mocap.joint_indices = {joint_name: names_with_end_sites.index(joint_name) for joint_name in names_with_end_sites}
     
     xml_root = XmlTree.Element("ANIMATION")
     xml_root.set('VERSION', '1100')

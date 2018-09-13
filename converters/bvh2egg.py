@@ -164,17 +164,17 @@ import sys
 import re
 import argparse
 
-from bvh import Bvh
 import transforms3d as t3d
 import numpy as np
 
-from converters.bvh_transforms import get_all_joints, get_euler_angles, get_affines, prune
+from bvhtree import BvhTree
+from converters.bvhtransforms import get_euler_angles, get_affines, prune
 
 
 def get_joint_data(bvh_tree, joint, scale=1.0):
     """ Extract data for a joint in the BVH tree that is relevant for compiling the egg file content.
     :param bvh_tree: BVH tree that holds the data.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: BvhTree
     :param joint: Joint object to extract data from for egg file.
     :type joint: bvh.BvhNode
     :param scale: Scale factor for root translation and offset values.
@@ -335,7 +335,7 @@ def get_egg_anim_tables(bvh_tree, scale=1.0):
     :rtype: str
     """
     egg_string = ''
-    for joint in get_all_joints(bvh_tree):
+    for joint in bvh_tree.get_joints(end_sites=True):
         joint_data = get_joint_data(bvh_tree, joint, scale=scale)
         # Close open tables, before we start a new one with a lesser level.
         egg_string = close_tables(egg_string, joint_data['level'] + 3)
@@ -356,7 +356,7 @@ def bvh2egg(bvh_filepath, dst_filepath=None, scale=1.0):
     :rtype: bool
     """
     with open(bvh_filepath) as file_handle:
-        mocap = Bvh(file_handle.read())
+        mocap = BvhTree(file_handle.read())
     
     # Even though the BVH is Y-up, because the skeleton got rotated by 90 degrees around X, Z is now up.
     coords_up = '<CoordinateSystem> { Z-up }\n'

@@ -51,51 +51,43 @@ https://github.com/imvu/cal3d/blob/master/tools/converter/fileformats.txt
 """
 
 import os
-import sys
 import argparse
 import xml.etree.ElementTree as XmlTree
 import itertools
 
-from bvh import Bvh
 import numpy as np
 import transforms3d as t3d
 
-from converters.bvh_transforms import get_all_joints
+from bvhtree import BvhTree
 from converters.ElementTree_pretty import prettify
 
 
-def get_bone_xml(bvh_tree, joint, scale=1.0):
+def get_bone_xml(bvh_tree, joint_name, scale=1.0):
     """Build the XML structure for a joints topological data.
     
     :param bvh_tree: BVH tree that holds the data.
-    :type bvh_tree: bvh.Bvh
-    :param joint: Joint object to extract data from for egg file.
-    :type joint: bvh.BvhNode
+    :type bvh_tree: BvhTree
+    :param joint_name: Name of joint to extract data from for egg file.
+    :type joint_name: str
     :param scale: Scale factor for root translation and offset values.
     :type scale: float
     :return: XML structure with topological data for this joint.
     :rtype: xml.etree.ElementTree.Element
     """
     # Get direct child joints.
-    children = list()
-    for child in joint.filter('JOINT'):
-        children.append(child)
-    for child in joint.filter('End'):  # There's maximum 1 End Site as child.
-        children.append(child)
+    children = bvh_tree.joint_children(joint_name)
     
-    bone_xml = XmlTree.Element('BONE', {'ID': str(bvh_tree.joints.index(joint)),
-                                        'NAME': joint.name,
+    bone_xml = XmlTree.Element('BONE', {'ID': str(bvh_tree.get_joint_index(joint_name)),
+                                        'NAME': joint_name,
                                         'NUMCHILDS': str(len(children)),
                                         })
     
-    offsets = [float(o) * scale for o in joint['OFFSET']]  # Convert to meters.
+    offsets = [float(o) * scale for o in bvh_tree.joint_offset(joint_name)]  # Convert to meters.
     world_trans = t3d.affines.compose(offsets, np.identity(3), np.ones(3))
-    
-    if joint.parent.value:
-        parent_id = bvh_tree.joints.index(joint.parent)
+    parent_id = bvh_tree.joint_parent_index(joint_name)
+    if parent_id:
         rot_str = "0 0 0 1"  # Quaternion (x, y, z, w)
     else:
-        parent_id = -1
         rot_str = np.array_str(np.roll(t3d.euler.euler2quat(*np.radians([-90., 0., 0.])), -1))[1:-1]
         offsets[1:] = offsets[-1:-3:-1]  # Switch Y and Z because the root is rotated around the X-Axis by -90 degrees.
     offsets_str = '{} {} {}'.format(offsets[0], offsets[1], offsets[2])
@@ -104,16 +96,12 @@ def get_bone_xml(bvh_tree, joint, scale=1.0):
     loc_rot_str = str(loc_rot)[1:-1]
     
     # Construct world position of joint.
-    idx = parent_id
-    while idx >= 0:
-        parent = bvh_tree.joints[idx]
-        parent_offsets = [float(o) * scale for o in parent['OFFSET']]
+    parent = bvh_tree.joint_parent(joint_name)
+    while parent:
+        parent_offsets = [float(o) * scale for o in bvh_tree.joint_offset(parent.name)]
         parent_trans = t3d.affines.compose(parent_offsets, np.identity(3), np.ones(3))
         world_trans = np.matmul(world_trans, parent_trans)
-        if parent.parent.value:
-            idx = bvh_tree.joints.index(parent.parent)
-        else:
-            idx = -1
+        parent = bvh_tree.joint_parent(parent.name)
     t_world = world_trans[:3, -1]
     
     XmlTree.SubElement(bone_xml, "TRANSLATION").text = offsets_str
@@ -123,7 +111,7 @@ def get_bone_xml(bvh_tree, joint, scale=1.0):
     XmlTree.SubElement(bone_xml, "PARENTID").text = str(parent_id)
     
     for child in children:
-        XmlTree.SubElement(bone_xml, "CHILDID").text = str(bvh_tree.joints.index(child))
+        XmlTree.SubElement(bone_xml, "CHILDID").text = str(bvh_tree.get_joint_index(child.name))
         
     return bone_xml
     
@@ -138,19 +126,23 @@ def bvh2xsf(bvh_filepath, dst_filepath=None, scale=1.0):
     :param scale: Scale factor for root translation and offset values.
     :type scale: float
     """
-    with open(bvh_filepath) as file_handle:
-        mocap = Bvh(file_handle.read())
+    try:
+        with open(bvh_filepath) as file_handle:
+            mocap = BvhTree(file_handle.read())
+    except OSError as e:
+        print("ERROR:", e)
+        return False
 
-    mocap.joints = get_all_joints(mocap)
-
+    joints = mocap.get_joints_names(end_sites=True)
+    
     xml_root = XmlTree.Element("SKELETON")
     xml_root.set('MAGIC', 'XSF')
     xml_root.set('VERSION', '1100')
-    xml_root.set('NUMBONES', str(len(mocap.joints)))
+    xml_root.set('NUMBONES', str(len(joints)))
     comment = XmlTree.Comment('Converted from {}'.format(os.path.basename(bvh_filepath)))
     xml_root.append(comment)
     # Use map to compute tracks.
-    bones = list(map(get_bone_xml, itertools.repeat(mocap), mocap.joints, itertools.repeat(scale)))
+    bones = list(map(get_bone_xml, itertools.repeat(mocap), joints, itertools.repeat(scale)))
     # Extend tracks to xml_root as children.
     xml_root.extend(bones)
     # Add indentation.
@@ -164,6 +156,8 @@ def bvh2xsf(bvh_filepath, dst_filepath=None, scale=1.0):
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
               "Make sure you have writing permissions.\n".format(e.errno, dst_filepath))
+        return False
+    return True
 
 
 if __name__ == "__main__":
@@ -183,7 +177,4 @@ if __name__ == "__main__":
     dst_file_path = args['out']
     scale = args['scale']
     
-    if not os.path.exists(src_file_path):
-        print("ERROR: file not found", src_file_path)
-        sys.exit(1)
     bvh2xsf(src_file_path, dst_file_path, scale)
