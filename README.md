@@ -4,8 +4,8 @@ This repository provides *Python3* scripts for manipulating and converting BVH m
 * remove_frames.py deletes a frame range from bvh files and optionally saves files to new location.
 
 <pre>
-usage: remove_frames.py [-h] [-v] [-e END] [-o [OUT [OUT ...]]]
-                        input.bvh [input.bvh ...] start
+usage: removeframes.py [-h] [-v] [-e END] [-o [OUT [OUT ...]]]
+                       input.bvh [input.bvh ...] start
 
 Delete range of frames from BVH files.
 
