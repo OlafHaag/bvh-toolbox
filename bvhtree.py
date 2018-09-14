@@ -114,4 +114,63 @@ class BvhTree(Bvh, object):  # Bvh is an old-style class, so we need object to f
             return False
             
     def write(self, out_stream):
-        raise NotImplementedError
+        out_stream.write(self._get_hierarchy_string())
+        out_stream.write(self._get_motion_string())
+
+    def _get_hierarchy_string(self):
+        s = 'HIERARCHY\n'
+        for joint in self.get_joints(end_sites=True):
+            s = self._close_scopes(s, self.get_joint_depth(joint.name))
+            s += self._get_joint_string(joint)
+        s = self._close_scopes(s)
+        return s
+
+    def get_joint_depth(self, name):
+        # How deep in the tree are we?
+        depth = 0
+        parent = self.joint_parent(name)
+        while parent:
+            depth += 1
+            parent = self.joint_parent(parent.name)
+        return depth
+        
+    def _get_joint_string(self, joint):
+        depth = self.get_joint_depth(joint.name)
+        
+        if not self.joint_children(joint.name):
+            s = '{0}{1}\n'.format('  ' * depth, 'End Site')
+            s += '{0}{{\n'.format('  ' * depth)
+            s += '{0}{1} {2}\n'.format('  ' * (depth+1), 'OFFSET', ' '.join(joint['OFFSET']))
+            s += '{0}}}\n'.format('  ' * depth)
+        else:
+            s = '{0}{1}\n'.format('  ' * depth, str(joint))
+            s += '{0}{{\n'.format('  ' * depth)
+            for attribute in ['OFFSET', 'CHANNELS']:
+                s += '{0}{1} {2}\n'.format('  ' * (depth + 1), attribute, ' '.join(joint[attribute]))
+        return s
+    
+    def _close_scopes(self, hierarchy_string, target_depth=0):
+        """ The string is hierarchically ordered. This function appends curly brackets to close open scopes.
+        It takes the indentation of the last closed bracket as reference for the current level/depth of the hierarchy.
+        :param hierarchy_string:
+        :type hierarchy_string: str
+        :param target_depth: The depth determines the target indentation.
+        :type target_depth: int
+        :return: string with closed scopes.
+        :rtype: str
+        """
+        # Get the last level by counting the spaces to the second to last line break.
+        last_depth = hierarchy_string[hierarchy_string[:-1].rfind("\n"):].count("  ")
+        diff = last_depth - target_depth
+        for depth in range(diff):
+            hierarchy_string += '{0}}}\n'.format('  ' * (last_depth - depth - 1))
+        return hierarchy_string
+
+    def _get_motion_string(self):
+        s = 'MOTION\n'
+        s += 'Frames: {}\n'.format(self.nframes)
+        s += 'Frame Time: {}\n'.format(self.frame_time)
+        for frame in self.frames:
+            s += ' '.join(frame)
+            s += '\n'
+        return s
