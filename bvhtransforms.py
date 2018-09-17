@@ -172,5 +172,5 @@ if __name__ == '__main__':
     with open(bvh_filepath) as file_handle:
         mocap = BvhTree(file_handle.read())
     
-    mat_hips = get_affines(mocap, 'pelvis')
-    mat_left_hand = get_affines(mocap, 'left_radius')
+    mat_hips = get_affines(mocap, 'Hips')
+    mat_left_hand = get_affines(mocap, 'LeftHand')

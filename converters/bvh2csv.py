@@ -37,7 +37,7 @@ import numpy as np
 import transforms3d as t3d
 
 from bvhtree import BvhTree
-from converters.bvhtransforms import get_affines
+from bvhtransforms import get_affines
 
 
 def write_joint_rotations(bvh_tree, filepath):

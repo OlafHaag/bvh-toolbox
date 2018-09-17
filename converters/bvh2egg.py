@@ -168,7 +168,7 @@ import transforms3d as t3d
 import numpy as np
 
 from bvhtree import BvhTree
-from converters.bvhtransforms import get_euler_angles, get_affines, prune
+from bvhtransforms import get_euler_angles, get_affines, prune
 
 
 def get_joint_data(bvh_tree, joint, scale=1.0):
