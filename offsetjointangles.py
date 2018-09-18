@@ -29,23 +29,23 @@ from bvhtree import BvhTree
 from bvhtransforms import get_quaternions, get_motion_data, set_motion_data
 
 
-def add_joint_angles(bvh_tree, angles):
+def add_angle_offsets(bvh_tree, angle_offsets):
     """Add rotation to joints in bvh_tree.
 
     :param bvh_tree: BVH structure
     :type bvh_tree: bvhtree.BvhTree
-    :param angles: A dictionary containing joint names as keys and euler angles in degrees as values.
+    :param angle_offsets: A dictionary containing joint names as keys and euler angles in degrees as values.
     The order of the euler angles needs to be the same as the channel order for this joint in the BVH file.
     If not all 3 rotation channels are present for a joint, the missing channels will get appended.
-    :type angles: dict
+    :type angle_offsets: dict
     """
-    if not angles:
+    if not angle_offsets:
         print("WARNING: No rotation offsets. Aborting.")
         return
     
     frames = get_motion_data(bvh_tree)
     # Convert the given euler angles to quaternions.
-    for joint_name, angle_values in angles.items():
+    for joint_name, angle_values in angle_offsets.items():
         try:
             joint = bvh_tree.get_joint(joint_name)
         except LookupError:
@@ -75,20 +75,20 @@ def add_joint_angles(bvh_tree, angles):
     set_motion_data(bvh_tree, frames)
 
 
-def bvh_angle_offset(src_filepath, angles, dst_filepath=None):
+def bvh_angle_offset(src_filepath, angle_offsets, dst_filepath=None):
     """
     :param src_filepath: File path for BVH source.
     :type src_filepath: str
-    :param angles: A dictionary containing joint names as keys and euler angles in degrees as values.
+    :param angle_offsets: A dictionary containing joint names as keys and euler angles in degrees as values.
     The order of the euler angles needs to be the same as the channel order for this joint in the BVH file.
     If not all 3 rotation channels are present for a joint, the missing channels will get appended.
-    :type angles: dict
+    :type angle_offsets: dict
     :param dst_filepath: File path for destination BVH file.
     :type dst_filepath: str
     :return: If reading and writing the BVH files was successful or not.
     :rtype: bool
     """
-    if not angles:
+    if not angle_offsets:
         print("WARNING: No rotation offsets. Aborting processing of file", src_filepath)
         return False
     
@@ -99,7 +99,7 @@ def bvh_angle_offset(src_filepath, angles, dst_filepath=None):
         print("ERROR:", e)
         return False
     
-    add_joint_angles(mocap, angles)
+    add_angle_offsets(mocap, angle_offsets)
     
     if not dst_filepath:
         dst_filepath = src_filepath
@@ -133,7 +133,7 @@ def load_angle_offsets(csv_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog=__file__,
-        description="""Add rotations to joints in BVH files.""",
+        description="""Add rotations as offsets to joints in BVH files.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files.")
