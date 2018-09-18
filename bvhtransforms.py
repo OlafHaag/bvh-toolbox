@@ -46,7 +46,30 @@ def prune(a, epsilon=0.00000001):
     """
     a[np.abs(a) < epsilon] = 0.0
     
+
+def get_motion_data(bvh_tree):
+    """Returns frames as numpy array.
     
+    :param bvh_tree: BVH structure.
+    :type bvh_tree: bvhtree.BvhTree
+    :return: Values for all channels for all frames.
+    :rtype: numpy.ndarray
+    """
+    frames = np.array(bvh_tree.frames).astype(float)
+    return frames
+
+
+def set_motion_data(bvh_tree, data):
+    """Sets the frames of bvh structure to values in data.
+    
+    :param bvh_tree: BVH structure.
+    :type bvh_tree: bvhtree.BvhTree
+    :param data: 2d array of float values. rows are frames, columns are channels.
+    :type data: numpy.ndarray
+    """
+    bvh_tree.frames = data.astype(str).tolist()
+    
+
 def reorder_axes(xyz, axes='zxy'):
     """Takes an input array in xyz order and re-arranges it to given axes order.
 
@@ -80,7 +103,7 @@ def get_euler_angles(bvh_tree, joint_name, axes='zxy'):
     """Return Euler angles in degrees for joint in all frames.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: BvhTree
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint
     :type joint_name: str
     :param axes: The order in which to return the angles. Usually that's the joint's channel order.
@@ -97,7 +120,7 @@ def get_quaternions(bvh_tree, joint_name, axes='rzxz'):
     """Get the wxyz quaternion representations of a joint for all frames.
     
     :param bvh_tree: BVH structure.
-    :type bvh_tree: BvhTree
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param axes: The order in which to parse the Euler angles. Usually that's the joint's channel order.
@@ -115,7 +138,7 @@ def get_rotation_matrices(bvh_tree, joint_name, axes='rzxz'):
     """Read the Euler angles of a joint in order given by axes and return it as rotation matrices for all frames.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: BvhTree
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param axes: The order in which to return the angles. Usually that's the joint's channel order.
@@ -133,7 +156,7 @@ def get_translations(bvh_tree, joint_name):
     """Get the xyz translation of a joint for all frames.
     
     :param bvh_tree: BVH structure.
-    :type bvh_tree: BvhTree
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :return: translations xyz for all frames (frames x 3).
@@ -148,7 +171,7 @@ def get_affines(bvh_tree, joint_name, axes='rzxz'):
     """Read the transforms of a joint with rotation in order given by axes and return it as an affine matrix.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: BvhTree
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param axes: The order in which to return the angles. Usually that's the joint's channel order.
