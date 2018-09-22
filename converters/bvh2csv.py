@@ -31,7 +31,6 @@ The degrees of freedom in the joints are written in the order they appear in the
 import os
 import sys
 import argparse
-import pandas as pd
 
 import numpy as np
 import transforms3d as t3d
@@ -50,17 +49,17 @@ def write_joint_rotations(bvh_tree, filepath):
     :return: If the write process was successful or not.
     :rtype: bool
     """
-    time_col = pd.Series(np.arange(0, bvh_tree.nframes*bvh_tree.frame_time, bvh_tree.frame_time), name='time')
-    dfs = [time_col]
+    time_col = np.arange(0, bvh_tree.nframes*bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
+    data_list = [time_col]
+    header = ['time']
     for joint in bvh_tree.get_joints():
         channels = [channel for channel in bvh_tree.joint_channels(joint.name) if channel[1:] == 'rotation']
-        column_names = ['{}.{}'.format(joint.name, channel[:1].lower()) for channel in channels]
-        dfs.append(pd.DataFrame(data=bvh_tree.frames_joint_channels(joint.name, channels), columns=column_names))
+        header.extend(['{}.{}'.format(joint.name, channel[:1].lower()) for channel in channels])
+        data_list.append(np.array(bvh_tree.frames_joint_channels(joint.name, channels)))
         
-    df = pd.concat(dfs, axis=1)
-    df.index.name = 'frame'
+    data = np.concatenate(data_list, axis=1)
     try:
-        df.to_csv(filepath)
+        np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',')
         return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
@@ -82,8 +81,9 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
     :return: If the write process was successful or not.
     :rtype: bool
     """
-    time_col = pd.Series(np.arange(0, bvh_tree.nframes * bvh_tree.frame_time, bvh_tree.frame_time), name='time')
-    dfs = [time_col]
+    time_col = np.arange(0, bvh_tree.nframes * bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
+    data_list = [time_col]
+    header = ['time']
     root = next(bvh_tree.root.filter('ROOT'))
     
     def get_world_locations(joint):
@@ -104,9 +104,9 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
         if scale != 1.0:
             joint.world_transforms[:, :3, 3] *= scale
             
-        column_names = ['{}.{}'.format(joint.name, channel) for channel in 'xyz']
+        header.extend(['{}.{}'.format(joint.name, channel) for channel in 'xyz'])
         loc = joint.world_transforms[:, :3, 3]
-        dfs.append(pd.DataFrame(data=loc, columns=column_names))
+        data_list.append(loc)
         
         if end_sites:
             end = list(joint.filter('End'))
@@ -116,10 +116,9 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
             get_world_locations(child)
     
     get_world_locations(root)
-    df = pd.concat(dfs, axis=1)
-    df.index.name = 'frame'
+    data = np.concatenate(data_list, axis=1)
     try:
-        df.to_csv(filepath)
+        np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',')
         return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
