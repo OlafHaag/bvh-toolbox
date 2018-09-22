@@ -82,7 +82,7 @@ import transforms3d as t3d
 
 from bvhtree import BvhTree
 from bvhtransforms import get_quaternions, get_translations
-from converters.ElementTree_pretty import prettify
+from convert.ElementTree_pretty import prettify
 
 
 def get_track(bvh_tree, joint_name, scale=1.0):

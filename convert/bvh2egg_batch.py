@@ -5,16 +5,16 @@ from multiprocessing import Pool, freeze_support
 import time
 import glob
 
-from converters.bvh2xaf import bvh2xaf
+from convert.bvh2egg import bvh2egg
 
 if __name__ == "__main__":
     freeze_support()
     parser = argparse.ArgumentParser(
         prog=__file__,
-        description="""Convert BVH files to the Cal3D ASCII animation files.""",
+        description="""Convert BVH files to Panda3D egg animation (only) files.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
-    parser.add_argument("-o", "--out", type=str, help="Destination folder path for XAF files. "
+    parser.add_argument("-o", "--out", type=str, help="Destination folder path for egg files. "
                                                       "If no out path is given, BVH folder is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
                         help="Scale factor for root translation and offset values. In case you have to switch from "
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     PROCESSES = min(len(file_args), 8)
     print("\nCreating pool with {} processes".format(PROCESSES))
     with Pool(processes=PROCESSES) as p:
-        res = p.starmap(bvh2xaf, file_args)
+        res = p.starmap(bvh2egg, file_args)
     print("Processing took: {:.2f} seconds".format(time.time()-t0))
     # Were there errors?
     if sum(res) != len(res):
