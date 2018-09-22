@@ -24,7 +24,7 @@
 This collection of function is for debugging purposes.
 The functions are meant to be used in an interactive session to evaluate conversion results.
 """
-from bvh import Bvh
+from bvhtree import BvhTree
 import numpy as np
 import transforms3d as t3d
 from sympy import Matrix
@@ -182,10 +182,10 @@ def get_bvh_tree(file_path):
     :param file_path: file path to BVH file.
     :type file_path: str
     :return: BVH tree
-    :rtype: Bvh
+    :rtype: bvhtree.BvhTree
     """
     with open(file_path) as file_handle:
-        bvh_tree = Bvh(file_handle.read())
+        bvh_tree = BvhTree(file_handle.read())
     return bvh_tree
 
 
@@ -217,7 +217,7 @@ def get_euler(bvh_tree, joint_name, frame=0, axes='zxy'):
     """Return Euler angles in degrees for joint at frame.
     
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint
     :type joint_name: str
     :param frame: frame to return
@@ -237,7 +237,7 @@ def joint2quat(bvh_tree, joint_name, frame=0, axes='rzxz'):
     """Read the Euler angles of a joint in order given by axes and return it as quaternions.
     
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param frame: The frame to return.
@@ -256,7 +256,7 @@ def joint2mat(bvh_tree, joint_name, frame=0, axes='rzxz'):
     """Read the Euler angles of a joint in order given by axes and return it as rotation matrix.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param frame: The frame to return.
@@ -275,7 +275,7 @@ def joint2affine(bvh_tree, joint_name, frame=0, axes='rzxz'):
     """Read the tranforms of a joint with rotation in order given by axes and return it as an affine matrix.
 
     :param bvh_tree: BVH structure.
-    :type bvh_tree: bvh.Bvh
+    :type bvh_tree: bvhtree.BvhTree
     :param joint_name: Name of the joint.
     :type joint_name: str
     :param frame: The frame to return.
