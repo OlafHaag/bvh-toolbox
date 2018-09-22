@@ -12,7 +12,7 @@ here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-    
+
 setup(name='bvhtoolbox',
       version='0.1a2',
       description='Python module for reading, manipulating and converting BVH mocap files',
@@ -23,7 +23,7 @@ setup(name='bvhtoolbox',
       url='https://github.com/olafhaag/bvh-toolbox',
       classifiers=[
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.7',
+        #'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
       ],
       keywords='bvh BioVision mocap convert animation 3d',
