@@ -44,9 +44,9 @@ All converters have a `--scale` parameter taking a float as an argument. You can
 
 # How to run the converter batch scripts (and circumvent ModuleNotFoundError)
 * Open terminal.
-* Go to parent directory of the __converters__ folder. Enter, for example:
-* `python -m converters.bvh2egg_batch` "*path/to/folder*" [-o "*output/folder*"] [-s 0.01]
-* or `python -m converters.bvh2xaf` "*path/to/file.bvh*" [-o "*destination/path/file.xaf*"] [-s 100]
+* Go to parent directory of the __convert__ folder. Enter, for example:
+* `python -m convert.bvh2egg_batch` "*path/to/folder*" [-o "*output/folder*"] [-s 0.01]
+* or `python -m convert.bvh2xaf` "*path/to/file.bvh*" [-o "*destination/path/file.xaf*"] [-s 100]
   * Use UNIX style file path separators ( __/__ ) if there are spaces in your path.
   * The statements in square brackets are optional.
     * `--out` or `-o` Specify the destination of the output. If you don't provide it, files are saved in the source folder.
