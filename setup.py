@@ -40,6 +40,7 @@ setup(name='bvhtoolbox',
                         'numpy',  # >= 1.15
                         'transforms3d >= 0.3.1'],
       extras_require={'dev': ['sympy', 'panda3d'],
+                      'test': ['pytest', 'hypothesis'],
                       },
       entry_points={'console_scripts': ['bvh2csv=bvhtoolbox/convert/bvh2csv_batch:main',
                                         'bvh2egg=bvhtoolbox/convert/bvh2egg_batch:main',
