@@ -35,6 +35,7 @@ setup(name='bvhtoolbox',
                                       'bvhtoolbox/convert/ElementTree_pretty',
                                       'bvhtoolbox/convert/egg_viewer',
                                       ]),
+      python_requires='>=3',
       install_requires=['bvh > 0.3',  # You may have to get version >0.3 from https://github.com/20tab/bvh-python.
                         'numpy',  # >= 1.15
                         'transforms3d >= 0.3.1'],
