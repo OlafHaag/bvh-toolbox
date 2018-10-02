@@ -38,11 +38,13 @@ _AXES2TUPLE = {
 
 
 def prune(a, epsilon=0.00000001):
-    """Sets values smaller than epsilon to 0.
+    """Sets absolute values smaller than epsilon to 0.
     It does this in-place on the input array.
 
     :param a: array
+    :type a: numpy.ndarray
     :param epsilon: threshold
+    :type epsilon: float
     """
     a[np.abs(a) < epsilon] = 0.0
     
