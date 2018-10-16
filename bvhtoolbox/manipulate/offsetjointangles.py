@@ -75,7 +75,7 @@ def add_angle_offsets(bvh_tree, angle_offsets):
     set_motion_data(bvh_tree, frames)
 
 
-def bvh_angle_offset(src_filepath, angle_offsets, dst_filepath=None):
+def bvhfile_offset_angles(src_filepath, angle_offsets, dst_filepath=None):
     """
     :param src_filepath: File path for BVH source.
     :type src_filepath: str
@@ -155,7 +155,7 @@ if __name__ == "__main__":
             dst_file = None
         else:
             dst_file = dst_files_paths[i]
-        res.append(bvh_angle_offset(bvh_file, angles, dst_file))
+        res.append(bvhfile_offset_angles(bvh_file, angles, dst_file))
 
     if sum(res) != len(res):
         print("ERROR: Some files could not be processed.")
