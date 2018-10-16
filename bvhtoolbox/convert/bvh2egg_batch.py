@@ -5,7 +5,7 @@ from multiprocessing import Pool, freeze_support
 import time
 import glob
 
-from convert.bvh2egg import bvh2egg
+from bvhtoolbox.convert import bvh2egg
 
 if __name__ == "__main__":
     freeze_support()

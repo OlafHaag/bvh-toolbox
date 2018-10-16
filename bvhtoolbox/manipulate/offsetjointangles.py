@@ -25,8 +25,8 @@ import argparse
 import numpy as np
 import transforms3d as t3d
 
-from bvhtree import BvhTree
-from bvhtransforms import get_quaternions, get_motion_data, set_motion_data
+from bvhtoolbox import BvhTree
+from bvhtoolbox import get_quaternions, get_motion_data, set_motion_data
 
 
 def add_angle_offsets(bvh_tree, angle_offsets):

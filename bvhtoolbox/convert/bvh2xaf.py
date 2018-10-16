@@ -80,8 +80,8 @@ import itertools
 import numpy as np
 import transforms3d as t3d
 
-from bvhtree import BvhTree
-from bvhtransforms import get_quaternions, get_translations
+from bvhtoolbox import BvhTree
+from bvhtoolbox import get_quaternions, get_translations
 from .prettify_elementtree import prettify
 
 

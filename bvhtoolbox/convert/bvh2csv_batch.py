@@ -36,7 +36,7 @@ from functools import partial
 import time
 import glob
 
-from convert.bvh2csv import bvh2csv
+from bvhtoolbox.convert import bvh2csv
 
 if __name__ == "__main__":
     freeze_support()

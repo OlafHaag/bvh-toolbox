@@ -24,7 +24,7 @@ from itertools import repeat
 import numpy as np
 import transforms3d as t3d
 
-from bvhtree import BvhTree
+from bvhtoolbox import BvhTree
 
 # Axis sequences for Euler angles.
 _NEXT_AXIS = [1, 2, 0, 1]

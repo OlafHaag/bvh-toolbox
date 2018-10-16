@@ -5,7 +5,7 @@ from multiprocessing import Pool, freeze_support
 import time
 import glob
 
-from convert.bvh2xaf import bvh2xaf
+from bvhtoolbox.convert import bvh2xaf
 
 if __name__ == "__main__":
     freeze_support()

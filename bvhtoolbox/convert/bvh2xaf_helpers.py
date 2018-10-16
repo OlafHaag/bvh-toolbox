@@ -24,10 +24,11 @@
 This collection of function is for debugging purposes.
 The functions are meant to be used in an interactive session to evaluate conversion results.
 """
-from bvhtree import BvhTree
 import numpy as np
 import transforms3d as t3d
 from sympy import Matrix
+
+from bvhtoolbox import BvhTree
 
 # Axis sequences for Euler angles.
 _NEXT_AXIS = [1, 2, 0, 1]
