@@ -80,25 +80,41 @@ def reorder_axes(xyz, axes='zxy'):
     :return: array in axes order.
     :rtype: numpy.ndarray
     """
+    if xyz.shape[-1] != 3 or len(xyz.shape) > 2:
+        print("ERROR: Frames must be 1D or 2D array with 3 columns for x,y,z axes!")
+        raise ValueError
     # If the output order is the same as the input, do not reorder.
     if axes == 'xyz':
         return xyz
-    else:
-        firstaxis, parity = _AXES2TUPLE[axes]
-        i = firstaxis
-        j = _NEXT_AXIS[i + parity]
-        k = _NEXT_AXIS[i - parity + 1]
-        # 1-D arrays and lists.
-        if len(xyz.shape) == 1 and xyz.shape[0] == 3:
-            res = np.array([xyz[i], xyz[j], xyz[k]])
-        # 2-D arrays: multiple frames.
-        elif len(xyz.shape) > 1 and xyz.shape[1] == 3:
-            # Todo: is something like data[:,1], data[:,2] = data[:,2], data[:,1].copy() faster/more efficient?
-            res = np.array([xyz[:, i], xyz[:, j], xyz[:, k]]).T
-        else:
-            print("ERROR: Arrays with more or less than 3 axes not implemented!")
-            res = None
-        return res
+    
+    i, j, k = _get_reordered_indices(axes)
+    # 1-D arrays.
+    if len(xyz.shape) == 1:
+        res = np.array([xyz[i], xyz[j], xyz[k]])
+    # 2-D arrays: multiple frames.
+    elif len(xyz.shape) == 2:
+        # Todo: is something like data[:,1], data[:,2] = data[:,2], data[:,1].copy() faster/more efficient?
+        res = np.array([xyz[:, i], xyz[:, j], xyz[:, k]]).T
+    return res
+
+
+def _get_reordered_indices(rotation_order):
+    """Returns indices for converting 'xyz' rotation order to given rotation order.
+    
+    :param rotation_order: Rotation order to convert to.
+    :type rotation_order: str
+    :return: Indices for getting from xyz to given axes rotation order.
+    :rtype: tuple
+    """
+    try:
+        firstaxis, parity = _AXES2TUPLE[rotation_order]
+    except KeyError:
+        print("Rotation order must be one of {}.".format(', '.join(_AXES2TUPLE.keys())))
+        raise
+    i = firstaxis
+    j = _NEXT_AXIS[i + parity]
+    k = _NEXT_AXIS[i - parity + 1]
+    return i, j, k
 
 
 def get_euler_angles(bvh_tree, joint_name, axes='zxy'):
