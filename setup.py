@@ -15,8 +15,8 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='bvhtoolbox',
-      version='0.1a2',
-      description='Python module for reading, manipulating and converting BVH mocap files',
+      version='0.1a3',
+      description='Python module for reading, manipulating and converting BVH motion capture files.',
       long_description=long_description,
       long_description_content_type='text/markdown',
       author='Olaf Haag',
