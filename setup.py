@@ -36,7 +36,9 @@ setup(name='bvhtoolbox',
                                       'bvhtoolbox/convert/egg_viewer',
                                       ]),
       python_requires='>=3',
-      install_requires=['bvh > 0.3',  # You may have to get version >0.3 from https://github.com/20tab/bvh-python.
+      install_requires=['pip >= 18.1',  # FixMe: because of PEP 508, only as long as bvh > 0.3 hasn't been pushed to PyPI.org
+                        'bvh @ https://github.com/20tab/bvh-python/archive/master.zip',
+                        #'bvh > 0.3',  # Get manually by: pip install git+https://github.com/20tab/bvh-python@master#egg=bvh
                         'numpy',  # >= 1.15
                         'transforms3d >= 0.3.1'],
       extras_require={'dev': ['sympy', 'panda3d'],
