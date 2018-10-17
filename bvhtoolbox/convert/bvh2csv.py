@@ -170,19 +170,19 @@ def bvh2csv(bvh_filepath, dst_dirpath=None, scale=1.0, do_rotation=True, do_loca
         return False
     else:
         return True
-        
 
-if __name__ == "__main__":
+
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Convert BVH file to CSV table format.""",
         epilog="""If neither -l or -r are specified, both CSV files will be created.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
-    parser.add_argument("-o", "--out", type=str, help="Destination folder for CSV files. "
-                                                      "If no destination path is given, BVH file path is used. "
-                                                      "CSV files will have the source file name appended by _rot.csv "
-                                                      "or _loc.csv respectively.")
+    parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files. "
+                                                            "If no destination path is given, BVH file path is used. "
+                                                            "CSV files will have the source file base name appended by "
+                                                            "suffixes _rot, _loc, and _hierarchy.csv respectively.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
                         help="Scale factor for root translation and offset values. In case you have to switch from "
                              "centimeters to meters or vice versa.")
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in location CSV. "
                                                                   "They do not have rotations.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to CSV.")
-    args = vars(parser.parse_args())
+    args = vars(parser.parse_args(argv))
     src_file_path = args['input.bvh']
     dst_folder_path = args['out']
     scale = args['scale']
@@ -206,4 +206,9 @@ if __name__ == "__main__":
     success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_location, do_end_sites)
     if not success:
         print("Some errors occurred. Aborting process.")
-        sys.exit(1)
+    return success
+
+
+if __name__ == "__main__":
+    exit_code = int(main())
+    sys.exit(exit_code)

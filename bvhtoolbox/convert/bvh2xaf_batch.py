@@ -7,8 +7,8 @@ import glob
 
 from bvhtoolbox.convert import bvh2xaf
 
-if __name__ == "__main__":
-    freeze_support()
+
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Convert BVH files to the Cal3D ASCII animation files.""",
@@ -20,7 +20,7 @@ if __name__ == "__main__":
                         help="Scale factor for root translation and offset values. In case you have to switch from "
                              "centimeters to meters or vice versa.")
     parser.add_argument("input folder", type=str, help="Folder containing BVH source files.")
-    args = vars(parser.parse_args())
+    args = vars(parser.parse_args(argv))
     src_folder_path = args['input folder']
     dst_folder_path = args['out']
     scale = args['scale']
@@ -40,11 +40,19 @@ if __name__ == "__main__":
         file_args.append((filename, os.path.join(dst_folder_path, filename[:-3] + 'egg'), scale))
     
     print("Converting {} files...".format(len(file_args)))
-    PROCESSES = min(len(file_args), 8)
-    print("\nCreating pool with {} processes".format(PROCESSES))
-    with Pool(processes=PROCESSES) as p:
+    n_processes = min(len(file_args), 8)
+    print("\nCreating pool with {} processes".format(n_processes))
+    with Pool(processes=n_processes) as p:
         res = p.starmap(bvh2xaf, file_args)
     print("Processing took: {:.2f} seconds".format(time.time()-t0))
     # Were there errors?
-    if sum(res) != len(res):
-        print("ERROR: Not all conversions were successful.")
+    num_errors = len(res) - sum(res)
+    if num_errors > 0:
+        print("ERROR: {} conversions were not successful.".format(num_errors))
+    return False if num_errors else True
+
+
+if __name__ == "__main__":
+    freeze_support()
+    exit_code = int(main())
+    sys.exit(exit_code)

@@ -42,13 +42,13 @@ setup(name='bvhtoolbox',
       extras_require={'dev': ['sympy', 'panda3d'],
                       'test': ['pytest', 'hypothesis'],
                       },
-      entry_points={'console_scripts': ['bvh2csv=bvhtoolbox/convert/bvh2csv_batch:main',
-                                        'bvh2egg=bvhtoolbox/convert/bvh2egg_batch:main',
-                                        'bvh2xaf=bvhtoolbox/convert/bvh2xaf_batch:main',
-                                        'bvh2xsf=bvhtoolbox/convert/bvh2xsf:main',
-                                        'bvhoffsetjointangles=bvhtoolbox/manipulate/offsetjointangles:main',
-                                        'bvhremoveframes=bvhtoolbox/manipulate/removeframes:main'
-                                        'bvhrenamejoints=bvhtoolbox/manipulate/renamejoints:main'
+      entry_points={'console_scripts': ['bvh2csv=bvhtoolbox.convert.bvh2csv_batch:main',
+                                        'bvh2egg=bvhtoolbox.convert.bvh2egg_batch:main',
+                                        'bvh2xaf=bvhtoolbox.convert.bvh2xaf_batch:main',
+                                        'bvh2xsf=bvhtoolbox.convert.bvh2xsf:main',
+                                        'bvhoffsetjointangles=bvhtoolbox.manipulate.offsetjointangles:main',
+                                        'bvhremoveframes=bvhtoolbox.manipulate.removeframes:main'
+                                        'bvhrenamejoints=bvhtoolbox.manipulate.renamejoints:main'
                                         ],
                     },
       project_urls={'Bug Reports': 'https://github.com/olafhaag/bvh-toolbox/issues',

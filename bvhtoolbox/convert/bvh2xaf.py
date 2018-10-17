@@ -205,7 +205,7 @@ def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
         return False
         
 
-if __name__ == "__main__":
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Convert BVH file to Cal3D XAF animation file.""",
@@ -217,7 +217,7 @@ if __name__ == "__main__":
                         help="Scale factor for root translation and offset values. In case you have to switch from "
                              "centimeters to meters or vice versa.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to XAF.")
-    args = vars(parser.parse_args())
+    args = vars(parser.parse_args(argv))
     src_file_path = args['input.bvh']
     dst_file_path = args['out']
     scale = args['scale']
@@ -226,5 +226,9 @@ if __name__ == "__main__":
         print("ERROR: file not found", src_file_path)
         sys.exit(1)
     success = bvh2xaf(src_file_path, dst_file_path, scale)
-    if not success:
-        sys.exit(1)
+    return success
+
+
+if __name__ == "__main__":
+    exit_code = int(main())
+    sys.exit(exit_code)

@@ -52,6 +52,7 @@ https://github.com/imvu/cal3d/blob/master/tools/converter/fileformats.txt
 
 import os
 import argparse
+import sys
 import xml.etree.ElementTree as XmlTree
 import itertools
 
@@ -160,7 +161,7 @@ def bvh2xsf(bvh_filepath, dst_filepath=None, scale=1.0):
     return True
 
 
-if __name__ == "__main__":
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Convert BVH file to Cal3D ASCII skeleton file (XSF).""",
@@ -172,9 +173,15 @@ if __name__ == "__main__":
                         help="Scale factor for root translation and offset values. In case you have to switch from "
                              "centimeters to meters or vice versa.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to XSF.")
-    args = vars(parser.parse_args())
+    args = vars(parser.parse_args(argv))
     src_file_path = args['input.bvh']
     dst_file_path = args['out']
     scale = args['scale']
     
-    bvh2xsf(src_file_path, dst_file_path, scale)
+    success = bvh2xsf(src_file_path, dst_file_path, scale)
+    return success
+    
+    
+if __name__ == "__main__":
+    exit_code = int(main())
+    sys.exit(exit_code)

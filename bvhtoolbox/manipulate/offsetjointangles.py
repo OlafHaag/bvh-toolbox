@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import sys
 import csv
 import argparse
 
@@ -130,7 +131,7 @@ def load_angle_offsets(csv_path):
     return angle_offsets
 
 
-if __name__ == "__main__":
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Add rotations as offsets to joints in BVH files.""",
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     parser.add_argument("angles.csv", type=str, help="CSV file containing the mapping of joint names to euler angles.")
     parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for modified BVH files. "
                                                                  "If no out path is given, or list is shorter than input files, BVH files are overwritten.")
-    args = vars(parser.parse_args())
+    args = vars(parser.parse_args(argv))
     src_files_paths = args['input.bvh']
     dst_files_paths = args['out']
     if not dst_files_paths:
@@ -157,5 +158,12 @@ if __name__ == "__main__":
             dst_file = dst_files_paths[i]
         res.append(bvhfile_offset_angles(bvh_file, angles, dst_file))
 
-    if sum(res) != len(res):
-        print("ERROR: Some files could not be processed.")
+    num_errors = len(res) - sum(res)
+    if num_errors > 0:
+        print("ERROR: {} files could not be processed.".format(num_errors))
+    return False if num_errors else True
+
+
+if __name__ == "__main__":
+    exit_code = int(main())
+    sys.exit(exit_code)

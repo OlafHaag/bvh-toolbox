@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 
 def remove_frames(file_path, start, end=None, dst_file=None):
@@ -61,7 +62,7 @@ def remove_frames(file_path, start, end=None, dst_file=None):
     return True
 
 
-if __name__ == "__main__":
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Delete range of frames from BVH files.""",
@@ -72,8 +73,9 @@ if __name__ == "__main__":
     parser.add_argument("start", type=int, help="The first frame you want to remove. Count begins at 1.")
     parser.add_argument("-e", "--end", type=int, help="The last frame you want to remove.")
     parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for BVH files. "
-                                                                 "If no out path is given, or list is shorter than input files, BVH files are overwritten.")
-    args = vars(parser.parse_args())
+                                                                 "If no out path is given, or list is shorter than "
+                                                                 "input files, BVH files are overwritten.")
+    args = vars(parser.parse_args(argv))
     src_files_paths = args['input.bvh']
     dst_files_paths = args['out']
     if not dst_files_paths:
@@ -90,5 +92,12 @@ if __name__ == "__main__":
             dst_file = dst_files_paths[i]
         res.append(remove_frames(bvh_file, start, end, dst_file))
 
-    if sum(res) != len(res):
-        print("ERROR: Some files could not be processed.")
+    num_errors = len(res) - sum(res)
+    if num_errors > 0:
+        print("ERROR: {} files could not be processed.".format(num_errors))
+    return False if num_errors else True
+
+
+if __name__ == "__main__":
+    exit_code = int(main())
+    sys.exit(exit_code)
