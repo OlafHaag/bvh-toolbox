@@ -54,5 +54,5 @@ def main(argv=sys.argv[1:]):
 
 if __name__ == "__main__":
     freeze_support()
-    exit_code = int(main())
+    exit_code = int(not main())
     sys.exit(exit_code)

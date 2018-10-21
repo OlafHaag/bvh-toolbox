@@ -205,10 +205,10 @@ def main(argv=sys.argv[1:]):
     
     success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_location, do_end_sites)
     if not success:
-        print("Some errors occurred. Aborting process.")
+        print("Some errors occurred.")
     return success
 
 
 if __name__ == "__main__":
-    exit_code = int(main())
+    exit_code = int(not main())
     sys.exit(exit_code)
