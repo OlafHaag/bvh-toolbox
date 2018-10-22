@@ -48,8 +48,9 @@ def bvh2csv_batch(*bvh_files, dst_dirpath=None, scale=1.0, do_rotation=True, do_
         res = p.map(partial(bvh2csv,
                             dst_dirpath=dst_dirpath,
                             scale=scale,
-                            do_rotation=do_rotation,
-                            do_location=do_location,
+                            export_rotation=do_rotation,
+                            export_location=do_location,
+                            export_hierarchy=False,
                             end_sites=end_sites),
                     bvh_files)
     # Were there errors?

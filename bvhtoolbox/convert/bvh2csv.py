@@ -59,7 +59,7 @@ def write_joint_rotations(bvh_tree, filepath):
         
     data = np.concatenate(data_list, axis=1)
     try:
-        np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',')
+        np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',', comments='')
         return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
@@ -118,15 +118,59 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
     get_world_locations(root)
     data = np.concatenate(data_list, axis=1)
     try:
-        np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',')
+        np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',', comments='')
         return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
               "Make sure you have writing permissions.\n".format(e.errno, filepath))
         return False
-    
-    
-def bvh2csv(bvh_filepath, dst_dirpath=None, scale=1.0, do_rotation=True, do_location=True, end_sites=True):
+
+
+def write_joint_hierarchy(bvh_tree, filepath, scale=1.0):
+    """Write joints' world positional data to a CSV file.
+
+    :param bvh_tree: BVH tree that holds the data.
+    :type bvh_tree: BvhTree
+    :param filepath: Destination file path for CSV file.
+    :type filepath: str
+    :param scale: Scale factor for offset values.
+    :type scale: float
+    :return: If the write process was successful or not.
+    :rtype: bool
+    """
+    data = list()
+    for joint in bvh_tree.get_joints(end_sites=True):
+        joint_name = joint.name
+        parent_name = bvh_tree.joint_parent(joint_name).name if bvh_tree.joint_parent(joint_name) else ''
+        row = [joint_name, parent_name]
+        row.extend((scale * offset for offset in bvh_tree.joint_offset(joint.name)))
+        data.append(tuple(row))
+    data = np.array(data, dtype=[('joint', np.unicode_, 20),
+                                 ('parent', np.unicode_, 20),
+                                 ('offset.x', np.float),
+                                 ('offset.y', np.float),
+                                 ('offset.z', np.float)])
+    try:
+        np.savetxt(filepath,
+                   data,
+                   header=','.join(data.dtype.names),
+                   fmt=['%s', '%s', '%10.5f', '%10.5f', '%10.5f'],
+                   delimiter=',',
+                   comments='')
+        return True
+    except IOError as e:
+        print("ERROR({}): Could not write to file {}.\n"
+              "Make sure you have writing permissions.\n".format(e.errno, filepath))
+        return False
+
+
+def bvh2csv(bvh_filepath,
+            dst_dirpath=None,
+            scale=1.0,
+            export_rotation=True,
+            export_location=True,
+            export_hierarchy=True,
+            end_sites=True):
     """Converts a BVH file into CSV file format.
 
     :param bvh_filepath: File path for BVH source.
@@ -135,10 +179,12 @@ def bvh2csv(bvh_filepath, dst_dirpath=None, scale=1.0, do_rotation=True, do_loca
     :type dst_dirpath: str
     :param scale: Scale factor for root translation and offset values.
     :type scale: float
-    :param do_rotation: Output rotation CSV file.
-    :type do_rotation: bool
-    :param do_location: Output world space location CSV file.
-    :type do_location: bool
+    :param export_rotation: Output rotation CSV file.
+    :type export_rotation: bool
+    :param export_location: Output world space location CSV file.
+    :type export_location: bool
+    :param export_hierarchy: Output hierarchy CSV file.
+    :type export_hierarchy: bool
     :param end_sites: Include BVH End Sites in location CSV.
     :type end_sites: bool
     :return: If the conversion was successful or not.
@@ -154,6 +200,7 @@ def bvh2csv(bvh_filepath, dst_dirpath=None, scale=1.0, do_rotation=True, do_loca
     # Assume everything works and only set False on error.
     loc_success = True
     rot_success = True
+    hierarchy_success = True
     if not dst_dirpath:
         dst_filepath = os.path.join(os.path.dirname(bvh_filepath), os.path.basename(bvh_filepath)[:-4])
     else:
@@ -161,15 +208,15 @@ def bvh2csv(bvh_filepath, dst_dirpath=None, scale=1.0, do_rotation=True, do_loca
         if not os.path.exists(dst_dirpath):
             os.mkdir(dst_dirpath)
         dst_filepath = os.path.join(dst_dirpath, os.path.basename(bvh_filepath)[:-4])
-    if do_location:
+    if export_location:
         loc_success = write_joint_locations(mocap, dst_filepath + '_loc.csv', scale, end_sites)
-    if do_rotation:
+    if export_rotation:
         rot_success = write_joint_rotations(mocap, dst_filepath + '_rot.csv')
-    
-    if not (loc_success or rot_success):
-        return False
-    else:
-        return True
+    if export_hierarchy:
+        hierarchy_success = write_joint_hierarchy(mocap, dst_filepath + '_hierarchy.csv', scale)
+
+    n_succeeded = sum([loc_success, rot_success, hierarchy_success])
+    return bool(n_succeeded)
 
 
 def main(argv=sys.argv[1:]):
@@ -190,6 +237,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("-l", "--location", action='store_true', help="Output world space location CSV file.")
     parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in location CSV. "
                                                                   "They do not have rotations.")
+    parser.add_argument("-H", "--hierarchy", action='store_true', help="Output skeleton hierarchy to CSV file.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to CSV.")
     args = vars(parser.parse_args(argv))
     src_file_path = args['input.bvh']
@@ -197,13 +245,14 @@ def main(argv=sys.argv[1:]):
     scale = args['scale']
     do_rotation = args['rotation']
     do_location = args['location']
+    do_hierarchy = args['hierarchy']
     # If neither rotation nor location are specified, do both.
     if not do_rotation and not do_location:
         do_rotation = True
         do_location = True
     do_end_sites = args['ends']
     
-    success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_location, do_end_sites)
+    success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_location, do_hierarchy, do_end_sites)
     if not success:
         print("Some errors occurred.")
     return success
