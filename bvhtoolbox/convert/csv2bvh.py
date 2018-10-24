@@ -30,7 +30,6 @@ But that means solving the problem of acute versus obtuse angles and decomposing
 Ain't nobody got time for that! :D
 """
 
-import os
 import sys
 import argparse
 
