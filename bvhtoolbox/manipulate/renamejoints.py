@@ -86,8 +86,8 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files which joints will be renamed.")
     parser.add_argument("mapping.csv", type=str, help="CSV file containing the mapping of old names to new ones.")
-    parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for BVH files. "
-                                                                 "If no out path is given, or list is shorter than "
+    parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for BVH files.\n"
+                                                                 "If no out path is given, or list is shorter than\n"
                                                                  "input files, BVH files are overwritten.")
     args = vars(parser.parse_args(argv))
     src_files_paths = args['input.bvh']

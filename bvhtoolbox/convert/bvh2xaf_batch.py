@@ -14,11 +14,11 @@ def main(argv=sys.argv[1:]):
         description="""Convert BVH files to the Cal3D ASCII animation files.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
-    parser.add_argument("-o", "--out", type=str, help="Destination folder path for XAF files. "
+    parser.add_argument("-o", "--out", type=str, help="Destination folder path for XAF files.\n"
                                                       "If no out path is given, BVH folder is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
-                        help="Scale factor for root translation and offset values. In case you have to switch from "
-                             "centimeters to meters or vice versa.")
+                        help="Scale factor for root translation and offset values.\n"
+                             "In case you have to switch from centimeters to meters or vice versa.")
     parser.add_argument("input folder", type=str, help="Folder containing BVH source files.")
     args = vars(parser.parse_args(argv))
     src_folder_path = args['input folder']

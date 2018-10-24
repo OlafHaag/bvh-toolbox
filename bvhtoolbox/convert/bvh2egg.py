@@ -384,11 +384,11 @@ def main(argv=sys.argv[1:]):
         description="""Convert BVH file to Panda3D egg animation (only) file.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.2')
-    parser.add_argument("-o", "--out", type=str, help="Destination file path for egg file. "
+    parser.add_argument("-o", "--out", type=str, help="Destination file path for egg file.\n"
                                                       "If no out path is given, BVH file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
-                        help="Scale factor for root translation and offset values. In case you have to switch from "
-                             "centimeters to meters or vice versa.")
+                        help="Scale factor for root translation and offset values.\n"
+                             "In case you have to switch from centimeters to meters or vice versa.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to egg.")
     args = vars(parser.parse_args(argv))
     src_file_path = args['input.bvh']

@@ -72,8 +72,8 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files to remove frames from.")
     parser.add_argument("start", type=int, help="The first frame you want to remove. Count begins at 1.")
     parser.add_argument("-e", "--end", type=int, help="The last frame you want to remove.")
-    parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for BVH files. "
-                                                                 "If no out path is given, or list is shorter than "
+    parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for BVH files.\n"
+                                                                 "If no out path is given, or list is shorter than\n"
                                                                  "input files, BVH files are overwritten.")
     args = vars(parser.parse_args(argv))
     src_files_paths = args['input.bvh']

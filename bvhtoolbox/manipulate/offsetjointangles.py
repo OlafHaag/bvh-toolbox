@@ -139,8 +139,9 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files.")
     parser.add_argument("angles.csv", type=str, help="CSV file containing the mapping of joint names to euler angles.")
-    parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for modified BVH files. "
-                                                                 "If no out path is given, or list is shorter than input files, BVH files are overwritten.")
+    parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for modified BVH files.\n"
+                                                                 "If no out path is given, or list is shorter than\n"
+                                                                 "input files, BVH files are overwritten.")
     args = vars(parser.parse_args(argv))
     src_files_paths = args['input.bvh']
     dst_files_paths = args['out']
