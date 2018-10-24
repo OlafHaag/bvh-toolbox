@@ -56,7 +56,7 @@ def bvh2csv_batch(bvh_files,
                             scale=scale,
                             export_rotation=export_rotation,
                             export_position=export_position,
-                            export_hierarchy=False,
+                            export_hierarchy=export_hierarchy,
                             end_sites=end_sites),
                     bvh_files)
     # Were there errors?
@@ -83,6 +83,7 @@ def main(argv=sys.argv[1:]):
                              "centimeters to meters or vice versa.")
     parser.add_argument("-r", "--rotation", action='store_true', help="Output rotation CSV files.")
     parser.add_argument("-p", "--position", action='store_true', help="Output world space position CSV files.")
+    parser.add_argument("-H", "--hierarchy", action='store_true', help="Output skeleton hierarchy to CSV file.")
     parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in position CSV. "
                                                                   "They do not have rotations.")
     parser.add_argument("input folder", type=str, help="Folder containing BVH source files.")
@@ -96,6 +97,7 @@ def main(argv=sys.argv[1:]):
     if not do_rotation and not do_position:
         do_rotation = True
         do_position = True
+    do_hierarchy = args['hierarchy']
     do_end_sites = args['ends']
     
     if not os.path.exists(src_folder_path):
@@ -112,6 +114,7 @@ def main(argv=sys.argv[1:]):
                           scale=scale_factor,
                           export_rotation=do_rotation,
                           export_position=do_position,
+                          export_hierarchy=do_hierarchy,
                           end_sites=do_end_sites)
     print("Processing took: {:.2f} seconds".format(time.time() - t0))
     return False if n_err else True
