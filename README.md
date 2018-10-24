@@ -56,4 +56,4 @@ All converters have a `--scale` parameter taking a float as an argument. You can
 
 # How to run the console batch scripts
 * Open terminal.
-* type `<script_name> -h` (substitute *script_name* by one of the commands above.) to get more information on the usage.
+* type `<script_name> -h` (substitute *<script_name>* by one of the commands above.) to get more information on the usage.
