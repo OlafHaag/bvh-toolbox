@@ -414,8 +414,8 @@ def write_file(data, file_path):
         return False
     
     
-def csv2bvh_file(hierarchy_file, position_file, rotation_file, destination_file, scale=1.0):
-    """ Composes BVH file from CSV input files.
+def csv2bvh_file(hierarchy_file, position_file, rotation_file, destination_file=None, scale=1.0):
+    """ Composes BVH file from CSV input files. If no destination path is given, CSV file path is used.
     
     :param hierarchy_file: CSV file path containing hierarchy. Columns: joint, parent, offset.x, offset.y, offset.z
     :type hierarchy_file: str
@@ -437,14 +437,14 @@ def csv2bvh_file(hierarchy_file, position_file, rotation_file, destination_file,
 def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
-        description="""Convert BVH file to CSV table format.""",
+        description="""Convert CSV tables to BVH file format.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1a1')
     parser.add_argument("-o", "--out", type=str, default='', help="Destination file path for BVH file.\n"
                                                              "If no destination path is given, CSV file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
-                        help="Scale factor for root position and offset values. In case you have to switch from "
-                             "centimeters to meters or vice versa.")
+                        help="Scale factor for root position and offset values.\n"
+                             "In case you have to switch from centimeters to meters or vice versa.")
     parser.add_argument("hierarchy.csv", type=str, help="CSV source file needed to convert to BVH.")
     parser.add_argument("position.csv", type=str, help="CSV source file needed to convert to BVH.")
     parser.add_argument("rotation.csv", type=str, help="CSV source file needed to convert to BVH.")

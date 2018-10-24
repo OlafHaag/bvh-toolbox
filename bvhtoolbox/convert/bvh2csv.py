@@ -223,12 +223,12 @@ def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Convert BVH file to CSV table format.""",
-        epilog="""If neither -l or -r are specified, both CSV files will be created.""",
+        epilog="""If neither -p nor -r are specified, both CSV files will be created.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
-    parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files. "
-                                                            "If no destination path is given, BVH file path is used. "
-                                                            "CSV files will have the source file base name appended by "
+    parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files.\n"
+                                                            "If no destination path is given, BVH file path is used.\n"
+                                                            "CSV files will have the source file base name appended by\n"
                                                             "suffixes _rot, _pos, and _hierarchy.csv respectively.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
                         help="Scale factor for root position and offset values. In case you have to switch from "

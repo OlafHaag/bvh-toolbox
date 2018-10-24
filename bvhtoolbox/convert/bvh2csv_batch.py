@@ -70,17 +70,17 @@ def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         prog=__file__,
         description="""Convert BVH files to CSV table format.""",
-        epilog="""If neither -l or -r are specified,
-                  both rotation and position CSV files will be created for each BVH file.""",
+        epilog="""If neither -p nor -r are specified, both rotation and position CSV files will be created for each BVH file.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
-    parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files. "
-                                                      "If no destination path is given, BVH file path is used. "
-                                                      "CSV files will have the source file base name appended by "
-                                                      "suffixes _rot, _pos, and _hierarchy.csv respectively.")
+    parser.add_argument("-o", "--out", type=str, default='',
+                        help="Destination folder for CSV files.\n"
+                             "If no destination path is given, BVH file path is used.\n"
+                             "CSV files will have the source file base name appended by\n"
+                             "suffixes _rot, _pos, and _hierarchy.csv respectively.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
-                        help="Scale factor for root position and offset values. In case you have to switch from "
-                             "centimeters to meters or vice versa.")
+                        help="Scale factor for root position and offset values.\n"
+                             "In case you have to switch from centimeters to meters or vice versa.")
     parser.add_argument("-r", "--rotation", action='store_true', help="Output rotation CSV files.")
     parser.add_argument("-p", "--position", action='store_true', help="Output world space position CSV files.")
     parser.add_argument("-H", "--hierarchy", action='store_true', help="Output skeleton hierarchy to CSV file.")
