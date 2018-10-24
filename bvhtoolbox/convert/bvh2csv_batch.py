@@ -39,7 +39,13 @@ import glob
 from bvhtoolbox.convert import bvh2csv
 
 
-def bvh2csv_batch(*bvh_files, dst_dirpath=None, scale=1.0, export_rotation=True, export_position=True, end_sites=True):
+def bvh2csv_batch(bvh_files,
+                  dst_dirpath=None,
+                  scale=1.0,
+                  export_rotation=True,
+                  export_position=True,
+                  export_hierarchy=False,
+                  end_sites=True):
     """Convert BVH files to CSV table format."""
     print("Converting {} files...".format(len(bvh_files)))
     n_processes = min(len(bvh_files), 8)
