@@ -1,53 +1,59 @@
 This repository provides *Python3* scripts for manipulating and converting BVH motion capture files.
 
-# Remove frames from BVH files
-* remove_frames.py deletes a frame range from bvh files and optionally saves files to new location.
+# Installation
+* This package depends on a bleeding edge version of the bvh module, that has not been pushed to pypi.org yet.  
+Therefore, you need to install this package using a direkt URL link for now.
+* Make sure to have pip >= 18.1 installed for supporting PEP 508 URL dependencies.
+  * On Linux/MacOS: `pip install --upgrade pip`
+  * On Windows use `python -m pip install --upgrade pip`
+* To install using development mode:  
+`pip install -e git+https://github.com/OlafHaag/bvh-toolbox.git@master#egg=bvhtoolbox`
+* To install using regular mode (building the package):  
+`pip install https://github.com/OlafHaag/bvh-toolbox/archive/master.zip`
+* The installation creates some console scripts you can use.
 
-<pre>
-usage: removeframes.py [-h] [-v] [-e END] [-o [OUT [OUT ...]]]
-                       input.bvh [input.bvh ...] start
+# Console scripts
+## Manipulate BVH files
+### Rename joints in bvh files
+* Command: **bvhrenamejoints** 
 
-Delete range of frames from BVH files.
+### Remove frames from BVH files
+* Command: **bvhremoveframes**
 
-positional arguments:
-  input.bvh             BVH files to remove frames from.
-  start                 The first frame you want to remove. Count begins at 1.
+### Offset joint angles in BVH files
+* Command: **bvhoffsetjointangles**
+* Can be used to additively offset joint angles in the BVH by supplying a csv table containing the mapping of joint names to euler angles.
+  * The angles must be in the same order as the joint's channels in the BVH hierarchy.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --ver             show program's version number and exit
-  -e END, --end END     The last frame you want to remove.
-  -o [OUT [OUT ...]], --out [OUT [OUT ...]]
-                        Destination file paths for BVH files. If no out path is given, or list is shorter than input files, BVH files are overwritten.
-</pre>
+## Convert from or to BVH files
 
-Following destination formats are supported by the converters:
-
-# BVH to Cal3D XSF & XAF
+### BVH to Cal3D XSF & XAF
+* Command: **bvh2xsf**
+* Command: **bvh2xaf**
 * Converts BVH files to the [Cal3D](https://github.com/mp3butcher/Cal3D/) XML skeleton (XSF) and animation (XAF) file formats.
 * The XAF files rely on the respective skeleton file.
 * XAF files have been tested to work with skeletons that were exported from 3DS Max and Blender.
 * I use the resulting xaf files in [Worldviz' Vizard](https://www.worldviz.com/vizard), so it's only been tested in this context.
 
-# BVH to Panda3D Egg animation file
+### BVH to Panda3D Egg animation file
+* Command: **bvh2egg**
 * Converts BVH files to the [Panda3D](https://panda3d.org/) animation file egg format.
 
-# BVH to CSV tables
+### BVH to CSV tables
+* Command: **bvh2csv**
 * Converts BVH to comma separated values tables.
-* Ouputs one file for joint rotation and one for joint world location.
-* Using only the `--rotation` or the `--location` flag you can output only one of the tables.
+* Ouputs one file for hierarchy, one for joint rotations, and one for joint world positions.
+* Use `--hierarchy` to export the respective CSV file.
+* Using only the `--rotation` or the `--position` flag you can output only one of the transform tables.
 * The `--out` parameter only takes a directory path as an argument.
-* With the `--ends` flag the End Sites are included in the *_loc.csv file.
+* With the `--ends` flag the End Sites are included in the *_pos.csv file.
 
+### CSV tables to BVH
+* Command: **csv2bvh**
+* Takes 3 CSV files (hierarchy, rotation, position) previously exported using *bvh2csv* or created otherwise and builds a bvh file from them.
 
-All converters have a `--scale` parameter taking a float as an argument. You can use it to convert between units for the location and offset values.
+All converters have a `--scale` parameter taking a float as an argument. You can use it to convert between units for the position and offset values.
 
-# How to run the converter batch scripts (and circumvent ModuleNotFoundError)
+# How to run the console batch scripts
 * Open terminal.
-* Go to parent directory of the __convert__ folder. Enter, for example:
-* `python -m convert.bvh2egg_batch` "*path/to/folder*" [-o "*output/folder*"] [-s 0.01]
-* or `python -m convert.bvh2xaf` "*path/to/file.bvh*" [-o "*destination/path/file.xaf*"] [-s 100]
-  * Use UNIX style file path separators ( __/__ ) if there are spaces in your path.
-  * The statements in square brackets are optional.
-    * `--out` or `-o` Specify the destination of the output. If you don't provide it, files are saved in the source folder.
-    * `--scale` or `-s` is a scale factor on the root's translation and joints' offset values in case you need to convert the data to meters or centimeters. This may depend on how you exported the skeleton.
+* type `<script_name> -h` (substitute *script_name* by one of the commands above.) to get more information on the usage.
