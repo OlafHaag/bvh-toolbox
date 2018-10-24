@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """ Convert animation data in BVH files to CSV format.
-Rotation data and translation are separate output files.
+Rotation data and position are separate output files.
 The first line is a header with each degree of freedom as a column.
 The first column is the frame for the data in that row.
 The second column is the time of the frame in seconds.
@@ -39,7 +39,7 @@ import glob
 from bvhtoolbox.convert import bvh2csv
 
 
-def bvh2csv_batch(*bvh_files, dst_dirpath=None, scale=1.0, do_rotation=True, do_location=True, end_sites=True):
+def bvh2csv_batch(*bvh_files, dst_dirpath=None, scale=1.0, export_rotation=True, export_position=True, end_sites=True):
     """Convert BVH files to CSV table format."""
     print("Converting {} files...".format(len(bvh_files)))
     n_processes = min(len(bvh_files), 8)
@@ -48,8 +48,8 @@ def bvh2csv_batch(*bvh_files, dst_dirpath=None, scale=1.0, do_rotation=True, do_
         res = p.map(partial(bvh2csv,
                             dst_dirpath=dst_dirpath,
                             scale=scale,
-                            export_rotation=do_rotation,
-                            export_location=do_location,
+                            export_rotation=export_rotation,
+                            export_position=export_position,
                             export_hierarchy=False,
                             end_sites=end_sites),
                     bvh_files)
@@ -65,19 +65,19 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Convert BVH files to CSV table format.""",
         epilog="""If neither -l or -r are specified,
-                  both rotation and location CSV files will be created for each BVH file.""",
+                  both rotation and position CSV files will be created for each BVH file.""",
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
     parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files. "
                                                       "If no destination path is given, BVH file path is used. "
                                                       "CSV files will have the source file base name appended by "
-                                                      "suffixes _rot, _loc, and _hierarchy.csv respectively.")
+                                                      "suffixes _rot, _pos, and _hierarchy.csv respectively.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
-                        help="Scale factor for root translation and offset values. In case you have to switch from "
+                        help="Scale factor for root position and offset values. In case you have to switch from "
                              "centimeters to meters or vice versa.")
     parser.add_argument("-r", "--rotation", action='store_true', help="Output rotation CSV files.")
-    parser.add_argument("-l", "--location", action='store_true', help="Output world space location CSV files.")
-    parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in location CSV. "
+    parser.add_argument("-p", "--position", action='store_true', help="Output world space position CSV files.")
+    parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in position CSV. "
                                                                   "They do not have rotations.")
     parser.add_argument("input folder", type=str, help="Folder containing BVH source files.")
     args = vars(parser.parse_args(argv))
@@ -85,11 +85,11 @@ def main(argv=sys.argv[1:]):
     dst_folder_path = args['out']
     scale_factor = args['scale']
     do_rotation = args['rotation']
-    do_location = args['location']
-    # If neither rotation nor location are specified, do both.
-    if not do_rotation and not do_location:
+    do_position = args['position']
+    # If neither rotation nor position are specified, do both.
+    if not do_rotation and not do_position:
         do_rotation = True
-        do_location = True
+        do_position = True
     do_end_sites = args['ends']
     
     if not os.path.exists(src_folder_path):
@@ -104,8 +104,8 @@ def main(argv=sys.argv[1:]):
     n_err = bvh2csv_batch(file_names,
                           dst_dirpath=dst_folder_path,
                           scale=scale_factor,
-                          do_rotation=do_rotation,
-                          do_location=do_location,
+                          export_rotation=do_rotation,
+                          export_position=do_position,
                           end_sites=do_end_sites)
     print("Processing took: {:.2f} seconds".format(time.time() - t0))
     return False if n_err else True

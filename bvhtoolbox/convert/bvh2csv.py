@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """ Convert animation data in BVH file to CSV format.
-Rotation data and translation are separate output files.
+Rotation data and position are separate output files.
 The first line is a header with each degree of freedom as a column.
 The first column is the frame for the data in that row.
 The second column is the time of the frame in seconds.
@@ -67,16 +67,16 @@ def write_joint_rotations(bvh_tree, filepath):
         return False
     
 
-def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
+def write_joint_positions(bvh_tree, filepath, scale=1.0, end_sites=False):
     """Write joints' world positional data to a CSV file.
     
     :param bvh_tree: BVH tree that holds the data.
     :type bvh_tree: BvhTree
     :param filepath: Destination file path for CSV file.
     :type filepath: str
-    :param scale: Scale factor for root translation and offset values.
+    :param scale: Scale factor for root position and offset values.
     :type scale: float
-    :param end_sites: Include BVH End Sites in location CSV.
+    :param end_sites: Include BVH End Sites in position CSV.
     :type end_sites: bool
     :return: If the write process was successful or not.
     :rtype: bool
@@ -86,7 +86,7 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
     header = ['time']
     root = next(bvh_tree.root.filter('ROOT'))
     
-    def get_world_locations(joint):
+    def get_world_positions(joint):
         if joint.value[0] == 'End':
             joint.world_transforms = np.tile(t3d.affines.compose(np.zeros(3), np.eye(3), np.ones(3)),
                                              (bvh_tree.nframes, 1, 1))
@@ -97,7 +97,7 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
             joint.world_transforms = get_affines(bvh_tree, joint.name, axes=axes_order)
             
         if joint != root:
-            # For joints substitute translation for offsets.
+            # For joints substitute position for offsets.
             offset = [float(o) for o in joint['OFFSET']]
             joint.world_transforms[:, :3, 3] = offset
             joint.world_transforms = np.matmul(joint.parent.world_transforms, joint.world_transforms)
@@ -105,17 +105,17 @@ def write_joint_locations(bvh_tree, filepath, scale=1.0, end_sites=False):
             joint.world_transforms[:, :3, 3] *= scale
             
         header.extend(['{}.{}'.format(joint.name, channel) for channel in 'xyz'])
-        loc = joint.world_transforms[:, :3, 3]
-        data_list.append(loc)
+        pos = joint.world_transforms[:, :3, 3]
+        data_list.append(pos)
         
         if end_sites:
             end = list(joint.filter('End'))
             if end:
-                get_world_locations(end[0])  # There can be only one End Site per joint.
+                get_world_positions(end[0])  # There can be only one End Site per joint.
         for child in joint.filter('JOINT'):
-            get_world_locations(child)
+            get_world_positions(child)
     
-    get_world_locations(root)
+    get_world_positions(root)
     data = np.concatenate(data_list, axis=1)
     try:
         np.savetxt(filepath, data, header=','.join(header), fmt='%10.5f', delimiter=',', comments='')
@@ -168,7 +168,7 @@ def bvh2csv(bvh_filepath,
             dst_dirpath=None,
             scale=1.0,
             export_rotation=True,
-            export_location=True,
+            export_position=True,
             export_hierarchy=True,
             end_sites=True):
     """Converts a BVH file into CSV file format.
@@ -177,15 +177,15 @@ def bvh2csv(bvh_filepath,
     :type bvh_filepath: str
     :param dst_dirpath: Folder path for destination CSV files.
     :type dst_dirpath: str
-    :param scale: Scale factor for root translation and offset values.
+    :param scale: Scale factor for root position and offset values.
     :type scale: float
     :param export_rotation: Output rotation CSV file.
     :type export_rotation: bool
-    :param export_location: Output world space location CSV file.
-    :type export_location: bool
+    :param export_position: Output world space position CSV file.
+    :type export_position: bool
     :param export_hierarchy: Output hierarchy CSV file.
     :type export_hierarchy: bool
-    :param end_sites: Include BVH End Sites in location CSV.
+    :param end_sites: Include BVH End Sites in position CSV.
     :type end_sites: bool
     :return: If the conversion was successful or not.
     :rtype: bool
@@ -198,7 +198,7 @@ def bvh2csv(bvh_filepath,
         return False
 
     # Assume everything works and only set False on error.
-    loc_success = True
+    pos_success = True
     rot_success = True
     hierarchy_success = True
     if not dst_dirpath:
@@ -208,14 +208,14 @@ def bvh2csv(bvh_filepath,
         if not os.path.exists(dst_dirpath):
             os.mkdir(dst_dirpath)
         dst_filepath = os.path.join(dst_dirpath, os.path.basename(bvh_filepath)[:-4])
-    if export_location:
-        loc_success = write_joint_locations(mocap, dst_filepath + '_loc.csv', scale, end_sites)
+    if export_position:
+        pos_success = write_joint_positions(mocap, dst_filepath + '_pos.csv', scale, end_sites)
     if export_rotation:
         rot_success = write_joint_rotations(mocap, dst_filepath + '_rot.csv')
     if export_hierarchy:
         hierarchy_success = write_joint_hierarchy(mocap, dst_filepath + '_hierarchy.csv', scale)
 
-    n_succeeded = sum([loc_success, rot_success, hierarchy_success])
+    n_succeeded = sum([pos_success, rot_success, hierarchy_success])
     return bool(n_succeeded)
 
 
@@ -229,13 +229,13 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files. "
                                                             "If no destination path is given, BVH file path is used. "
                                                             "CSV files will have the source file base name appended by "
-                                                            "suffixes _rot, _loc, and _hierarchy.csv respectively.")
+                                                            "suffixes _rot, _pos, and _hierarchy.csv respectively.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
-                        help="Scale factor for root translation and offset values. In case you have to switch from "
+                        help="Scale factor for root position and offset values. In case you have to switch from "
                              "centimeters to meters or vice versa.")
     parser.add_argument("-r", "--rotation", action='store_true', help="Output rotation CSV file.")
-    parser.add_argument("-l", "--location", action='store_true', help="Output world space location CSV file.")
-    parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in location CSV. "
+    parser.add_argument("-p", "--position", action='store_true', help="Output world space position CSV file.")
+    parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in position CSV. "
                                                                   "They do not have rotations.")
     parser.add_argument("-H", "--hierarchy", action='store_true', help="Output skeleton hierarchy to CSV file.")
     parser.add_argument("input.bvh", type=str, help="BVH source file to convert to CSV.")
@@ -244,15 +244,15 @@ def main(argv=sys.argv[1:]):
     dst_folder_path = args['out']
     scale = args['scale']
     do_rotation = args['rotation']
-    do_location = args['location']
+    do_position = args['position']
     do_hierarchy = args['hierarchy']
-    # If neither rotation nor location are specified, do both.
-    if not do_rotation and not do_location:
+    # If neither rotation nor position are specified, do both.
+    if not do_rotation and not do_position:
         do_rotation = True
-        do_location = True
+        do_position = True
     do_end_sites = args['ends']
     
-    success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_location, do_hierarchy, do_end_sites)
+    success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_position, do_hierarchy, do_end_sites)
     if not success:
         print("Some errors occurred.")
     return success
