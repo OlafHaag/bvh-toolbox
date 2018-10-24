@@ -102,7 +102,7 @@ def main(argv=sys.argv[1:]):
     
     if not os.path.exists(src_folder_path):
         print("ERROR: Folder not found", src_folder_path)
-        sys.exit(1)
+        return False
     
     os.chdir(src_folder_path)
     # Keep track of when we started.
