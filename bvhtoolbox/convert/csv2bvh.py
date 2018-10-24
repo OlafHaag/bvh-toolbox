@@ -30,6 +30,8 @@ But that means solving the problem of acute versus obtuse angles and decomposing
 Ain't nobody got time for that! :D
 """
 
+import os
+import errno
 import sys
 import argparse
 
@@ -429,6 +431,18 @@ def csv2bvh_file(hierarchy_file, position_file, rotation_file, destination_file=
     :type scale: float
     :return: Whether writing to file was successful or not.
     """
+    if not destination_file:
+        bvh_file = os.path.basename(hierarchy_file).replace('_hierarchy', '').replace('.csv', '.bvh')
+        destination_file = os.path.join(os.path.dirname(hierarchy_file), bvh_file)
+    else:
+        # If the specified path doesn't yet exist, create it.
+        if not os.path.exists(os.path.dirname(destination_file)):
+            try:
+                os.mkdir(os.path.dirname(destination_file))
+            except OSError as exc:  # Guard against race condition.
+                if exc.errno != errno.EEXIST:
+                    raise
+
     data = csv2bvh_string(hierarchy_file, position_file, rotation_file, scale)
     success = write_file(data, destination_file)
     return success
