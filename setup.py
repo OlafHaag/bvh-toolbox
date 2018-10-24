@@ -15,7 +15,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='bvhtoolbox',
-      version='0.1a3',
+      version='0.1a4',
       description='Python module for reading, manipulating and converting BVH motion capture files.',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -45,13 +45,13 @@ setup(name='bvhtoolbox',
                       'test': ['pytest', 'hypothesis'],
                       },
       entry_points={'console_scripts': ['bvh2csv=bvhtoolbox.convert.bvh2csv_batch:main',
-                                        'csv2bvh=bvhtoolbox.convert.csv2bvh_file:main',
+                                        'csv2bvh=bvhtoolbox.convert.csv2bvh:main',
                                         'bvh2egg=bvhtoolbox.convert.bvh2egg_batch:main',
                                         'bvh2xaf=bvhtoolbox.convert.bvh2xaf_batch:main',
                                         'bvh2xsf=bvhtoolbox.convert.bvh2xsf:main',
                                         'bvhoffsetjointangles=bvhtoolbox.manipulate.offsetjointangles:main',
-                                        'bvhremoveframes=bvhtoolbox.manipulate.removeframes:main'
-                                        'bvhrenamejoints=bvhtoolbox.manipulate.renamejoints:main'
+                                        'bvhremoveframes=bvhtoolbox.manipulate.removeframes:main',
+                                        'bvhrenamejoints=bvhtoolbox.manipulate.renamejoints:main',
                                         ],
                     },
       project_urls={'Bug Reports': 'https://github.com/olafhaag/bvh-toolbox/issues',
