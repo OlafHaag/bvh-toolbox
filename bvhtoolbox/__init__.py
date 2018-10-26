@@ -7,3 +7,5 @@ from .bvhtransforms import get_affines,\
                            get_motion_data, \
                            set_motion_data,\
                            prune
+
+__version__ = '0.1a4'
