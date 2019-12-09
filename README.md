@@ -1,14 +1,11 @@
 This repository provides *Python3* scripts for manipulating and converting BVH motion capture files.
 
 # Installation
-* This package depends on a bleeding edge version of the bvh module, that has not been pushed to pypi.org yet.  
-Therefore, you need to install this package using a direkt URL link for now.
-* Make sure to have pip >= 18.1 installed for supporting PEP 508 URL dependencies.
-  * On Linux/MacOS: `pip install --upgrade pip`
-  * On Windows use `python -m pip install --upgrade pip`
+* To install from PyPi:  
+`pip install bvhtoolbox`
 * To install using development mode:  
 `pip install -e git+https://github.com/OlafHaag/bvh-toolbox.git@master#egg=bvhtoolbox`
-* To install using regular mode (building the package):  
+* To install latest development version using regular mode (building the package):  
 `pip install https://github.com/OlafHaag/bvh-toolbox/archive/master.zip`
 * The installation creates some console scripts you can use.
 
@@ -58,3 +55,6 @@ All converters have a `--scale` parameter taking a float as an argument. You can
 * Open terminal.
 * If you've installed the bvhtoolbox into a conda/virtual environment, you have to activate it first.
 * type `<script_name> -h` (substitute *<script_name>* by one of the commands above) to get more information on the usage.
+
+# Notes
+This package includes 20tabs' bvh module due to a lack of updates for this module on pypi.org.
