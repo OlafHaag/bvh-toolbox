@@ -11,3 +11,4 @@ python_version = "3.7"
 [packages.bvhtoolbox]
 path = "."
 editable = true
+extras = ["dev", "test"]
