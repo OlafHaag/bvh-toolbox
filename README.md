@@ -3,7 +3,7 @@ This repository provides *Python3* scripts for manipulating and converting BVH m
 # Installation
 * To install from PyPi:  
 `pip install bvhtoolbox`
-* To install using development mode:  
+* To install from github using development mode:  
 `pip install -e git+https://github.com/OlafHaag/bvh-toolbox.git@master#egg=bvhtoolbox`
 * To install latest development version using regular mode (building the package):  
 `pip install https://github.com/OlafHaag/bvh-toolbox/archive/master.zip`
