@@ -30,9 +30,9 @@ def parallelize(fn, *args):
                 try:
                     print("\nCreating pool with {} processes.".format(n_processes))
                     with Pool(processes=n_processes) as p:
-                        results = p.map(partial_func, args[0])  # FixMe: Can't pickle. Windows only?
+                        results = p.map(partial_func, args[0])  # FixMe: Can't pickle.
                 except PicklingError:
-                    print("WARNING: Known issue encountered with multiprocessing. Are you on Windows? Try Linux.\n"
+                    print("WARNING: Known issue encountered with multiprocessing.\n"
                           "Switching to sequential processing.")
                     #results = list(map(partial_func, args[0]))
                     # More verbose feedback.
