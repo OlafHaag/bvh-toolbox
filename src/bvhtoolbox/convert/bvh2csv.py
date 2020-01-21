@@ -36,7 +36,7 @@ from multiprocessing import freeze_support
 import numpy as np
 import transforms3d as t3d
 
-from .. import __version__ as version
+from .. import get_pkg_version
 from .. import BvhTree
 from .. import get_affines
 from .multiprocess import get_bvh_files, parallelize
@@ -229,7 +229,7 @@ def main(argv=sys.argv[1:]):
         description="""Convert BVH file to CSV table format.""",
         epilog="""If neither -p nor -r are specified, both CSV files will be created.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(get_pkg_version()))
     parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files.\n"
                                                             "If no destination path is given, BVH file path is used.\n"
                                                             "CSV files will have the source file base name appended by\n"

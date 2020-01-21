@@ -168,7 +168,7 @@ from multiprocessing import freeze_support
 import transforms3d as t3d
 import numpy as np
 
-from .. import __version__ as version
+from .. import get_pkg_version
 from .. import BvhTree
 from .. import get_euler_angles, get_affines, prune
 from .multiprocess import get_bvh_files, parallelize
@@ -391,7 +391,7 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Convert BVH file to Panda3D egg animation (only) file.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(get_pkg_version()))
     parser.add_argument("-o", "--out", type=str, help="Destination file for folder path for egg file.\n"
                                                       "If no out path is given, BVH file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,

@@ -8,8 +8,6 @@ except ImportError:
 from os import path
 from io import open
 
-from src.bvhtoolbox import __version__ as version
-
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -17,7 +15,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='bvhtoolbox',
-      version=version,
+      version='0.1.1',
       description='Python module for reading, manipulating and converting BVH motion capture files.',
       long_description=long_description,
       long_description_content_type='text/markdown',

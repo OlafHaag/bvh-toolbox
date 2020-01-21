@@ -59,7 +59,7 @@ import itertools
 import numpy as np
 import transforms3d as t3d
 
-from .. import __version__ as version
+from .. import get_pkg_version
 from .. import BvhTree
 from .prettify_elementtree import prettify
 
@@ -167,7 +167,7 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Convert BVH file to Cal3D ASCII skeleton file (XSF).""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(get_pkg_version()))
     parser.add_argument("-o", "--out", type=str, help="Destination file path for XSF file.\n"
                                                       "If no out path is given, BVH file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,

@@ -1,4 +1,4 @@
-__version__ = '0.1.1'
+import pkg_resources
 
 from .bvh import Bvh, BvhNode
 from .bvhtree import BvhTree
@@ -11,3 +11,10 @@ from .bvhtransforms import get_affines,\
                            set_motion_data,\
                            prune
 
+
+def get_pkg_version():
+    version = pkg_resources.get_distribution(__package__).version
+    return version
+
+
+__version__ = get_pkg_version()
