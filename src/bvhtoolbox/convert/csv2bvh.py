@@ -37,6 +37,7 @@ import argparse
 
 import numpy as np
 
+from .. import __version__ as version
 from .. import BvhTree
 
 
@@ -453,7 +454,7 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Convert CSV tables to BVH file format.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1a1')
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
     parser.add_argument("-o", "--out", type=str, default='', help="Destination file path for BVH file.\n"
                                                              "If no destination path is given, CSV file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,

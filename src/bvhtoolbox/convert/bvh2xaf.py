@@ -76,13 +76,16 @@ import sys
 import argparse
 import xml.etree.ElementTree as XmlTree
 import itertools
+from multiprocessing import freeze_support
 
 import numpy as np
 import transforms3d as t3d
 
+from .. import __version__ as version
 from .. import BvhTree
 from .. import get_quaternions, get_translations
 from .prettify_elementtree import prettify
+from .multiprocess import get_bvh_files, parallelize
 
 
 def get_track(bvh_tree, joint_name, scale=1.0):
@@ -160,19 +163,20 @@ def get_track(bvh_tree, joint_name, scale=1.0):
     return track
 
 
-def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
+@parallelize
+def bvh2xaf(bvh_path, dst_path=None, scale=1.0):
     """ Converts a BVH file into the Cal3D XAF animation file format.
 
-    :param bvh_filepath: File path for BVH source.
-    :type bvh_filepath: str
-    :param dst_filepath: File path for destination Cal3D animation file (XAF).
-    :type dst_filepath: str
+    :param bvh_path: File path(s) for BVH source.
+    :type bvh_path: str|list
+    :param dst_path: File or folder path for destination Cal3D animation file (XAF).
+    :type dst_path: str
     :param scale: Scale factor for root translation and offset values.
     :type scale: float
     :return: If the conversion was successful or not.
     :rtype: bool
     """
-    with open(bvh_filepath) as file_handle:
+    with open(bvh_path) as file_handle:
         mocap = BvhTree(file_handle.read())
     
     duration = (mocap.nframes - 1) * mocap.frame_time
@@ -184,7 +188,7 @@ def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
     xml_root.set('MAGIC', 'XAF')
     xml_root.set('DURATION', str(duration))
     xml_root.set('NUMTRACKS', str(n_tracks))
-    comment = XmlTree.Comment('Converted from {}'.format(os.path.basename(bvh_filepath)))
+    comment = XmlTree.Comment('Converted from {}'.format(os.path.basename(bvh_path)))
     xml_root.append(comment)
     # Use map to compute tracks.
     tracks = list(map(get_track, itertools.repeat(mocap), joint_names, itertools.repeat(scale)))
@@ -193,15 +197,19 @@ def bvh2xaf(bvh_filepath, dst_filepath=None, scale=1.0):
     # Add indentation.
     xml_str = prettify(xml_root)
     
-    if not dst_filepath:
-        dst_filepath = bvh_filepath[:-3] + 'xaf'
+    if not dst_path:
+        dst_path = bvh_path[:-3] + 'xaf'
+        
+    if os.path.isdir(dst_path):
+        dst_path = os.path.join(dst_path, os.path.basename(bvh_path)[:-3] + 'xaf')
+        
     try:
-        with open(dst_filepath, 'w') as file_handle:
+        with open(dst_path, 'w') as file_handle:
             file_handle.write(xml_str)
         return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
-              "Make sure you have writing permissions.\n".format(e.errno, dst_filepath))
+              "Make sure you have writing permissions.\n".format(e.errno, dst_path))
         return False
         
 
@@ -210,25 +218,24 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Convert BVH file to Cal3D XAF animation file.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
-    parser.add_argument("-o", "--out", type=str, help="Destination file path for XAF file.\n"
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
+    parser.add_argument("-o", "--out", type=str, help="Destination file for folder path for XAF file.\n"
                                                       "If no out path is given, BVH file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
                         help="Scale factor for root translation and offset values.\n"
                              "In case you have to switch from centimeters to meters or vice versa.")
-    parser.add_argument("input.bvh", type=str, help="BVH source file to convert to XAF.")
+    parser.add_argument("input.bvh", type=str, help="BVH source file or folder path to convert to XAF.")
     args = vars(parser.parse_args(argv))
-    src_file_path = args['input.bvh']
-    dst_file_path = args['out']
+    src_path = args['input.bvh']
+    dst_path = args['out']
     scale = args['scale']
     
-    if not os.path.exists(src_file_path):
-        print("ERROR: file not found", src_file_path)
-        sys.exit(1)
-    success = bvh2xaf(src_file_path, dst_file_path, scale)
+    files = get_bvh_files(src_path)
+    success = bvh2xaf(files, dst_path=dst_path, scale=scale)
     return success
 
 
 if __name__ == "__main__":
+    freeze_support()
     exit_code = int(not main())
     sys.exit(exit_code)

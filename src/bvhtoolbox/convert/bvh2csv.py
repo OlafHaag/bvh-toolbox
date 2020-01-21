@@ -31,12 +31,15 @@ The degrees of freedom in the joints are written in the order they appear in the
 import os
 import sys
 import argparse
+from multiprocessing import freeze_support
 
 import numpy as np
 import transforms3d as t3d
 
+from .. import __version__ as version
 from .. import BvhTree
 from .. import get_affines
+from .multiprocess import get_bvh_files, parallelize
 
 
 def write_joint_rotations(bvh_tree, filepath):
@@ -164,7 +167,8 @@ def write_joint_hierarchy(bvh_tree, filepath, scale=1.0):
         return False
 
 
-def bvh2csv(bvh_filepath,
+@parallelize
+def bvh2csv(bvh_path,
             dst_dirpath=None,
             scale=1.0,
             export_rotation=True,
@@ -173,8 +177,8 @@ def bvh2csv(bvh_filepath,
             end_sites=True):
     """Converts a BVH file into CSV file format.
 
-    :param bvh_filepath: File path for BVH source.
-    :type bvh_filepath: str
+    :param bvh_path: File path(s) for BVH source.
+    :type bvh_path: str|list
     :param dst_dirpath: Folder path for destination CSV files.
     :type dst_dirpath: str
     :param scale: Scale factor for root position and offset values.
@@ -191,10 +195,10 @@ def bvh2csv(bvh_filepath,
     :rtype: bool
     """
     try:
-        with open(bvh_filepath) as file_handle:
+        with open(bvh_path) as file_handle:
             mocap = BvhTree(file_handle.read())
     except IOError as e:
-        print("ERROR {}: Could not open file".format(e.errno), bvh_filepath)
+        print("ERROR {}: Could not open file".format(e.errno), bvh_path)
         return False
 
     # Assume everything works and only set False on error.
@@ -202,12 +206,12 @@ def bvh2csv(bvh_filepath,
     rot_success = True
     hierarchy_success = True
     if not dst_dirpath:
-        dst_filepath = os.path.join(os.path.dirname(bvh_filepath), os.path.basename(bvh_filepath)[:-4])
+        dst_filepath = os.path.join(os.path.dirname(bvh_path), os.path.basename(bvh_path)[:-4])
     else:
         # If the specified path doesn't yet exist, create it.
         if not os.path.exists(dst_dirpath):
             os.mkdir(dst_dirpath)
-        dst_filepath = os.path.join(dst_dirpath, os.path.basename(bvh_filepath)[:-4])
+        dst_filepath = os.path.join(dst_dirpath, os.path.basename(bvh_path)[:-4])
     if export_position:
         pos_success = write_joint_positions(mocap, dst_filepath + '_pos.csv', scale, end_sites)
     if export_rotation:
@@ -225,7 +229,7 @@ def main(argv=sys.argv[1:]):
         description="""Convert BVH file to CSV table format.""",
         epilog="""If neither -p nor -r are specified, both CSV files will be created.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
     parser.add_argument("-o", "--out", type=str, default='', help="Destination folder for CSV files.\n"
                                                             "If no destination path is given, BVH file path is used.\n"
                                                             "CSV files will have the source file base name appended by\n"
@@ -238,10 +242,10 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("-e", "--ends", action='store_true', help="Include BVH End Sites in position CSV. "
                                                                   "They do not have rotations.")
     parser.add_argument("-H", "--hierarchy", action='store_true', help="Output skeleton hierarchy to CSV file.")
-    parser.add_argument("input.bvh", type=str, help="BVH source file to convert to CSV.")
+    parser.add_argument("input.bvh", type=str, help="BVH file path or folder for converting to CSV.")
     args = vars(parser.parse_args(argv))
-    src_file_path = args['input.bvh']
-    dst_folder_path = args['out']
+    src_path = args['input.bvh']
+    dst_path = args['out']
     scale = args['scale']
     do_rotation = args['rotation']
     do_position = args['position']
@@ -252,12 +256,20 @@ def main(argv=sys.argv[1:]):
         do_position = True
     do_end_sites = args['ends']
     
-    success = bvh2csv(src_file_path, dst_folder_path, scale, do_rotation, do_position, do_hierarchy, do_end_sites)
+    files = get_bvh_files(src_path)
+    success = bvh2csv(files,
+                      dst_dirpath=dst_path,
+                      scale=scale,
+                      export_rotation=do_rotation,
+                      export_position=do_position,
+                      export_hierarchy=do_hierarchy,
+                      end_sites=do_end_sites)
     if not success:
         print("Some errors occurred.")
     return success
 
 
 if __name__ == "__main__":
+    freeze_support()
     exit_code = int(not main())
     sys.exit(exit_code)

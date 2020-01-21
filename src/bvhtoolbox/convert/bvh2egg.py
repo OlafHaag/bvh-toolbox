@@ -163,12 +163,15 @@ import os
 import sys
 import re
 import argparse
+from multiprocessing import freeze_support
 
 import transforms3d as t3d
 import numpy as np
 
+from .. import __version__ as version
 from .. import BvhTree
 from .. import get_euler_angles, get_affines, prune
+from .multiprocess import get_bvh_files, parallelize
 
 
 def get_joint_data(bvh_tree, joint, scale=1.0):
@@ -343,38 +346,43 @@ def get_egg_anim_tables(bvh_tree, scale=1.0):
     return egg_string
 
 
-def bvh2egg(bvh_filepath, dst_filepath=None, scale=1.0):
+@parallelize
+def bvh2egg(bvh_path, dst_path=None, scale=1.0):
     """ Converts a BVH file into the Panda3D egg animation file format.
     
-    :param bvh_filepath: File path for BVH source.
-    :type bvh_filepath: str
-    :param dst_filepath: File path for destination Panda3D Egg file.
-    :type dst_filepath: str
+    :param bvh_path: File path(s) for BVH source.
+    :type bvh_path: str|list
+    :param dst_path: File or folder path for destination Panda3D Egg file.
+    :type dst_path: str
     :param scale: Scale factor for root translation and offset values.
     :type scale: float
     :return: If the conversion was successful or not.
     :rtype: bool
     """
-    with open(bvh_filepath) as file_handle:
+    with open(bvh_path) as file_handle:
         mocap = BvhTree(file_handle.read())
     
     # Even though the BVH is Y-up, because the skeleton got rotated by 90 degrees around X, Z is now up.
     coords_up = '<CoordinateSystem> { Z-up }\n'
-    comment = '<Comment> {{ Converted from {0} }}\n'.format(os.path.basename(bvh_filepath))
+    comment = '<Comment> {{ Converted from {0} }}\n'.format(os.path.basename(bvh_path))
     init_table_str = '<Table> {\n  <Bundle> Armature {\n    <Table> "<skeleton>" {\n'
     
     egg_str = coords_up + comment + init_table_str + get_egg_anim_tables(mocap, scale=scale)
     egg_str = close_tables(egg_str)
     
-    if not dst_filepath:
-        dst_filepath = bvh_filepath[:-3] + 'egg'
+    if not dst_path:
+        dst_path = bvh_path[:-3] + 'egg'
+        
+    if os.path.isdir(dst_path):
+        dst_path = os.path.join(dst_path, os.path.basename(bvh_path)[:-3] + 'egg')
+        
     try:
-        with open(dst_filepath, 'w') as file_handle:
+        with open(dst_path, 'w') as file_handle:
             file_handle.write(egg_str)
         return True
     except IOError as e:
         print("ERROR({}): Could not write to file {}.\n"
-              "Make sure you have writing permissions.\n".format(e.errno, dst_filepath))
+              "Make sure you have writing permissions.\n".format(e.errno, dst_path))
         return False
 
 
@@ -383,25 +391,24 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Convert BVH file to Panda3D egg animation (only) file.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.2')
-    parser.add_argument("-o", "--out", type=str, help="Destination file path for egg file.\n"
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(version))
+    parser.add_argument("-o", "--out", type=str, help="Destination file for folder path for egg file.\n"
                                                       "If no out path is given, BVH file path is used.")
     parser.add_argument("-s", "--scale", type=float, default=1.0,
                         help="Scale factor for root translation and offset values.\n"
                              "In case you have to switch from centimeters to meters or vice versa.")
-    parser.add_argument("input.bvh", type=str, help="BVH source file to convert to egg.")
+    parser.add_argument("input.bvh", type=str, help="BVH source file or folder path to convert to egg.")
     args = vars(parser.parse_args(argv))
-    src_file_path = args['input.bvh']
-    dst_file_path = args['out']
+    src_path = args['input.bvh']
+    dst_path = args['out']
     scale = args['scale']
     
-    if not os.path.exists(src_file_path):
-        print("ERROR: file not found", src_file_path)
-        sys.exit(1)
-    success = bvh2egg(src_file_path, dst_file_path, scale)
+    files = get_bvh_files(src_path)
+    success = bvh2egg(files, dst_path=dst_path, scale=scale)
     return success
 
 
 if __name__ == "__main__":
+    freeze_support()
     exit_code = int(not main())
     sys.exit(exit_code)
