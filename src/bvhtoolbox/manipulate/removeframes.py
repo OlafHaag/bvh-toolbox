@@ -38,7 +38,7 @@ def remove_frames(file_path, start, end=None, dst_file=None):
         return False
 
     # Find first frame.
-    frames_idx = lines.index(next(l for l in lines if l.startswith('Frames: ')))
+    frames_idx = lines.index(next(line for line in lines if line.startswith('Frames:')))
     frame1_idx = frames_idx + 2
 
     # Slice together the parts we want to keep.
