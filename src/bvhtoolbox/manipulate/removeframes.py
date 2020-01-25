@@ -2,6 +2,8 @@ import argparse
 import os
 import sys
 
+from .. import get_pkg_version
+
 
 def remove_frames(file_path, start, end=None, dst_file=None):
     """Delete frames in BVH file from start to end or to the end of file.
@@ -68,7 +70,7 @@ def main(argv=sys.argv[1:]):
         description="""Delete range of frames from BVH files.""",
         epilog="Use Unix-style path separators '/' or double backslash '\\\\' on Windows!\n",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(get_pkg_version()))
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files to remove frames from.")
     parser.add_argument("start", type=int, help="The first frame you want to remove. Count begins at 1.")
     parser.add_argument("-e", "--end", type=int, help="The last frame you want to remove.")

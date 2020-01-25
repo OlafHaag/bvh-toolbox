@@ -26,6 +26,7 @@ import argparse
 import numpy as np
 import transforms3d as t3d
 
+from .. import get_pkg_version
 from .. import BvhTree
 from .. import get_quaternions, get_motion_data, set_motion_data
 
@@ -136,7 +137,7 @@ def main(argv=sys.argv[1:]):
         prog=__file__,
         description="""Add rotations as offsets to joints in BVH files.""",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(get_pkg_version()))
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files.")
     parser.add_argument("angles.csv", type=str, help="CSV file containing the mapping of joint names to euler angles.")
     parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for modified BVH files.\n"

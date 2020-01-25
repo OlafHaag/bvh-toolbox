@@ -28,6 +28,8 @@ import argparse
 import csv
 import re
 
+from .. import get_pkg_version
+
 
 def rename_joints(source_path, names_map, destination_path=None):
     """Rename joints in a BVH file using a dictionary and save the file.
@@ -83,7 +85,7 @@ def main(argv=sys.argv[1:]):
         description="""Rename joints in BVH files.""",
         epilog="Use Unix-style path separators '/' or double backslash '\\\\' on Windows!\n",
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-v", "--ver", action='version', version='%(prog)s 0.1')
+    parser.add_argument("-v", "--ver", action='version', version='%(prog)s v{}'.format(get_pkg_version()))
     parser.add_argument("input.bvh", nargs='+', type=str, help="BVH files which joints will be renamed.")
     parser.add_argument("mapping.csv", type=str, help="CSV file containing the mapping of old names to new ones.")
     parser.add_argument("-o", "--out", nargs='*', type=str, help="Destination file paths for BVH files.\n"
