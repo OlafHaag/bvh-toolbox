@@ -166,6 +166,7 @@ def get_track(bvh_tree, joint_name, scale=1.0):
 @parallelize
 def bvh2xaf(bvh_path, dst_path=None, scale=1.0):
     """ Converts a BVH file into the Cal3D XAF animation file format.
+    When passing keyword arguments, keywords must be used!
 
     :param bvh_path: File path(s) for BVH source.
     :type bvh_path: str|list

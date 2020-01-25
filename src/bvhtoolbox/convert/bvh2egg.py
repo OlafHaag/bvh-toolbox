@@ -349,7 +349,8 @@ def get_egg_anim_tables(bvh_tree, scale=1.0):
 @parallelize
 def bvh2egg(bvh_path, dst_path=None, scale=1.0):
     """ Converts a BVH file into the Panda3D egg animation file format.
-    
+    When passing keyword arguments, keywords must be used!
+
     :param bvh_path: File path(s) for BVH source.
     :type bvh_path: str|list
     :param dst_path: File or folder path for destination Panda3D Egg file.

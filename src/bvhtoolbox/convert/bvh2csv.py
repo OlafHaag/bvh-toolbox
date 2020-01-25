@@ -176,6 +176,7 @@ def bvh2csv(bvh_path,
             export_hierarchy=True,
             end_sites=True):
     """Converts a BVH file into CSV file format.
+    When passing keyword arguments, keywords must be used!
 
     :param bvh_path: File path(s) for BVH source.
     :type bvh_path: str|list
