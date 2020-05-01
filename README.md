@@ -1,5 +1,7 @@
 This repository provides *Python3* scripts for manipulating and converting BVH motion capture files.
 
+[![Latest version on PyPI](https://img.shields.io/pypi/v/bvhtoolbox.svg)](https://pypi.org/project/bvhtoolbox)
+
 # Installation
 * To install from PyPi:  
 `pip install bvhtoolbox`
@@ -12,7 +14,7 @@ This repository provides *Python3* scripts for manipulating and converting BVH m
 # Console scripts
 ## Manipulate BVH files
 ### Rename joints in bvh files
-* Command: **bvhrenamejoints** 
+* Command: **bvhrenamejoints**
 
 ### Remove frames from BVH files
 * Command: **bvhremoveframes**
