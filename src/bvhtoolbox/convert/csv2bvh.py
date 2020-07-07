@@ -56,7 +56,7 @@ def get_hierarchy_data(hierarchy_file, scale=1.0):
     except OSError as e:
         print("ERROR:", e)
         raise
-    offsets = rec_array[['offsetx', 'offsety', 'offsetz']].copy().view((float, 3))
+    offsets = np.array(rec_array[['offsetx', 'offsety', 'offsetz']].tolist())
     offsets *= scale
     joint_info = {j[0]: {'parent': j[1], 'offset': offsets[i], 'children': []}
                   for i, j in enumerate(rec_array)}
