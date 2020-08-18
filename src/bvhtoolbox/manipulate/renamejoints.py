@@ -63,8 +63,8 @@ def rename_joints(source_path, names_map, destination_path=None):
         match = prog.search(line)
         if match:
             joint = match.group().lstrip()
-            if joint in mapping:
-                lines[idx] = line.replace(joint, mapping[joint])
+            if joint in names_map:
+                lines[idx] = line.replace(joint, names_map[joint])
     
     # If no destination file is specified, overwrite input file.
     if not destination_path:
