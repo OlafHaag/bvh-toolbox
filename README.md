@@ -1,6 +1,7 @@
 This repository provides *Python3* scripts for manipulating and converting BVH motion capture files.
 
 [![Latest version on PyPI](https://img.shields.io/pypi/v/bvhtoolbox.svg)](https://pypi.org/project/bvhtoolbox)
+[![Test Python package](https://github.com/OlafHaag/bvh-toolbox/workflows/Test%20Python%20package/badge.svg)](https://github.com/OlafHaag/bvh-toolbox/actions?query=workflow%3A%22Test+Python+package%22)
 
 # Installation
 * To install from PyPi:  
