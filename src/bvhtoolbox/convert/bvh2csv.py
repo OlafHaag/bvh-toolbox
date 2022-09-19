@@ -52,7 +52,7 @@ def write_joint_rotations(bvh_tree, filepath):
     :return: If the write process was successful or not.
     :rtype: bool
     """
-    time_col = np.arange(0, bvh_tree.nframes*bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
+    time_col = np.arange(0, (bvh_tree.nframes - 0.5)*bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
     data_list = [time_col]
     header = ['time']
     for joint in bvh_tree.get_joints():
@@ -84,7 +84,7 @@ def write_joint_positions(bvh_tree, filepath, scale=1.0, end_sites=False):
     :return: If the write process was successful or not.
     :rtype: bool
     """
-    time_col = np.arange(0, bvh_tree.nframes * bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
+    time_col = np.arange(0, (bvh_tree.nframes - 0.5) * bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
     data_list = [time_col]
     header = ['time']
     root = next(bvh_tree.root.filter('ROOT'))
