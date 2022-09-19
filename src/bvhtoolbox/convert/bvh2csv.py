@@ -85,6 +85,8 @@ def write_joint_positions(bvh_tree, filepath, scale=1.0, end_sites=False):
     :rtype: bool
     """
     time_col = np.arange(0, bvh_tree.nframes * bvh_tree.frame_time, bvh_tree.frame_time)[:, None]
+    if len(time_col) > bvh_tree.nframes:
+        time_col = time_col[:-1]
     data_list = [time_col]
     header = ['time']
     root = next(bvh_tree.root.filter('ROOT'))
